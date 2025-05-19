@@ -1,0 +1,40 @@
+# Node modules dan dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# File konfigurasi dan cache
+.DS_Store
+.env
+.env.*.local
+*.local
+.vscode
+.idea
+*.log
+
+# Build artifacts
+dist
+build
+coverage
+
+# Docker file sendiri
+Dockerfile*
+.dockerignore
+
+# Git files
+.git
+.gitignore
+
+# Optional: testing-related files
+*.test.js
+*.spec.js
+__tests__
+
+# Optional: documentation or misc
+*.md
+docs/
+
+# Temporary folder
+tmp/
+logs/
