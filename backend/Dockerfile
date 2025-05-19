@@ -1,4 +1,4 @@
-FROM node:23-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -7,8 +7,11 @@ RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 COPY . .
 
+RUN pnpm approve-builds
+
 RUN pnpm build
+
 
 EXPOSE 8000
 
-CMD ["pnpm", "start"]
+ENTRYPOINT [ "pnpm", "start" ]
