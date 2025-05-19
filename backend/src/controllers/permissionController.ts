@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
 import { z } from "zod";
-import PermissionService from "../services/permission";
-import validate from "../utils/validate";
+import PermissionService from "~/services/permission";
+import validate from "~/utils/validate";
 
 export const createPermission = async (req: Request, res: Response) => {
   const schema = z.object({

@@ -1,5 +1,5 @@
 import type { Knex } from "knex";
-import { PaginationParams, PaginationResult } from "../types/pagination";
+import { PaginationParams, PaginationResult } from "~/types/pagination";
 
 export async function paginate<T>(
   queryBuilder: Knex.QueryBuilder,

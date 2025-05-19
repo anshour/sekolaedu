@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { HttpError } from "../types/http-error";
+import { HttpError } from "~/types/http-error";
 
 const authorizePermission = (permission: string) => {
   return (req: Request, res: Response, next: NextFunction) => {

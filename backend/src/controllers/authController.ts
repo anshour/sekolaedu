@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
-import validate from "../utils/validate";
-import UserService from "../services/user";
-import { HttpError } from "../types/http-error";
+import UserService from "~/services/user";
+import { HttpError } from "~/types/http-error";
+import validate from "~/utils/validate";
 
 const authController = {
   async login(req: Request, res: Response) {
@@ -92,12 +92,14 @@ const authController = {
   },
 
   async getCurrentUser(req: Request, res: Response) {
+    // @ts-ignore
     const user = req.user;
     res.json({ user });
   },
 
   async updateUser(req: Request, res: Response) {
-    const userId = req.user!.id;
+    // @ts-ignore
+    const userId = req.user.id;
     const schema = z.object({
       name: z.string().min(3),
       email: z.string().email(),

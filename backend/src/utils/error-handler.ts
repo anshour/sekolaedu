@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { HttpError, HttpValidationError } from "../types/http-error";
+import { HttpError, HttpValidationError } from "~/types/http-error";
 import logger from "./logger";
 
 export const notFoundHandler = (

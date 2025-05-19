@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { HttpError } from "../types/http-error";
-import UserService from "../services/user";
-import config from "../config";
+import config from "~/config";
+import UserService from "~/services/user";
+import { HttpError } from "~/types/http-error";
 
 async function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.header("Authorization")?.replace("Bearer ", "");
