@@ -33,6 +33,12 @@ app.use(morgan("dev"));
 // app.use("/api/auth", authRouter);
 // app.use("/api/permissions", permissionRouter);
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Hello World",
+  });
+});
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
