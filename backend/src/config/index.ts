@@ -1,7 +1,34 @@
-import app from "./app";
+import jwt from "jsonwebtoken";
+
+require("dotenv").config();
 
 const config = {
-  app,
+  nodeEnv: process.env.NODE_ENV ?? "development",
+  frontendUrl: process.env.FRONTEND_URL ?? "http://localhost:3000",
+  port: process.env.PORT ?? 8000,
+  inServerless: process.env.IN_SERVERLESS === "true",
+
+  loggerLevel: process.env.LOGGER_LEVEL ?? "info",
+
+  jwtExpireMinutes: parseInt(process.env.JWT_EXPIRE_MINUTES ?? "60"),
+  jwtSecretKey: process.env.JWT_SECRET_KEY ?? "",
+  jwtHashAlgorithm: (process.env.JWT_HASH_ALGORITHM ??
+    "HS256") as jwt.Algorithm,
+
+  awsBucket: process.env.AWS_BUCKET,
+  awsDefaultRegion: process.env.AWS_DEFAULT_REGION,
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+
+  dbHost: process.env.DB_HOST,
+  dbPort: process.env.DB_PORT,
+  dbUser: process.env.DB_USER,
+  dbPassword: process.env.DB_PASSWORD,
+  dbName: process.env.DB_NAME,
+  dbSsl: process.env.DB_SSL === "true",
+  dbSchema: process.env.DB_SCHEMA ?? "public",
+
+  //   resendKey: process.env.RESEND_KEY ?? "",
 };
 
 export default config;
