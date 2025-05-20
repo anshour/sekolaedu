@@ -16,7 +16,6 @@ class UserService {
 
     const [userId] = await knex("users").insert({
       ...user,
-      role: "staff",
       password: hashedPassword,
     });
 
