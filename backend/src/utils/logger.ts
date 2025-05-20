@@ -3,11 +3,14 @@ import fs from "fs";
 import path from "path";
 import dayjs from "dayjs";
 
-const logDir = path.join(process.cwd(), "logs");
-if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
-const getLogFileName = () =>
-  path.join(logDir, `${dayjs().format("YYYY-MM-DD")}.log`);
+//!BUG : LOG TO FILE DOESNWORK IN GOOGLE CLOUD RUN (MUST BE TO /TMP FOLDER)
+// const logDir = path.join(process.cwd(), "logs");
+// if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
+// const getLogFileName = () =>
+//   path.join(logDir, `${dayjs().format("YYYY-MM-DD")}.log`);
 
-const logger = pino({ level: "info" }, pino.destination(getLogFileName()));
+// const logger = pino({ level: "info" }, pino.destination(getLogFileName()));
+
+const logger = pino({ level: "info" });
 
 export default logger;
