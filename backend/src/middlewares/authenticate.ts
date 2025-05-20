@@ -12,7 +12,7 @@ async function authenticate(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    const decoded = jwt.verify(token, config.app.jwtSecretKey) as {
+    const decoded = jwt.verify(token, config.jwtSecretKey) as {
       user_id: number;
     };
 
