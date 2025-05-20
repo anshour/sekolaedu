@@ -1,5 +1,4 @@
 import { Knex } from "knex";
-import config from "../config";
 
 export async function up(knex: Knex) {
   return knex.schema.createTable("password_resets", (table) => {
