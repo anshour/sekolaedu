@@ -3,7 +3,7 @@ import { HttpValidationError } from "~/types/http-error";
 
 const validate = <T extends ZodSchema>(
   schema: T,
-  data: Record<string, any> = {},
+  data: Record<string, unknown> = {},
 ): zodInfer<T> => {
   const result = schema.safeParse(data);
 
