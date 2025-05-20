@@ -1,0 +1,21 @@
+import config from "./src/config";
+
+require("ts-node/register");
+
+const knexConfig = {
+  client: "pg",
+  connection: {
+    host: config.dbHost,
+    port: config.dbPort,
+    user: config.dbUser,
+    database: config.dbName,
+    password: config.dbPassword,
+    ssl: config.dbSsl ? { rejectUnauthorized: false } : false,
+  },
+  migrations: {
+    directory: "./src/migrations",
+  },
+  searchPath: [config.dbSchema],
+};
+
+export default knexConfig;
