@@ -5,7 +5,7 @@ import knex from "../database/connection";
 import config from "../config";
 import { HttpError } from "../types/http-error";
 // import { Resend } from "resend";
-// import config.app from "src/constants/config.app";
+// import config from "src/constants/config";
 // import ResetPasswordEmail from "src/templates/email/reset-password";
 
 class UserService {
@@ -57,11 +57,11 @@ class UserService {
   static async generateUserToken(user: User): Promise<string> {
     const data = {
       user_id: user.id,
-      exp: Math.floor(Date.now() / 1000) + 60 * config.app.jwtExpireMinutes,
+      exp: Math.floor(Date.now() / 1000) + 60 * config.jwtExpireMinutes,
     };
 
-    const encoded = jwt.sign(data, config.app.jwtSecretKey, {
-      algorithm: config.app.jwtHashAlgorithm,
+    const encoded = jwt.sign(data, config.jwtSecretKey, {
+      algorithm: config.jwtHashAlgorithm,
     });
 
     return encoded;
@@ -73,7 +73,7 @@ class UserService {
       exp: Math.floor(Date.now() / 1000) + 60 * 60,
     };
 
-    return jwt.sign(data, config.app.jwtSecretKey);
+    return jwt.sign(data, config.jwtSecretKey);
   }
 
   static async resetPassword(
@@ -111,7 +111,7 @@ class UserService {
 
   static async sendResetPasswordEmail(user: User): Promise<void> {
     const token = this.generateRandomString(32);
-    const resetLink = `${config.app.frontendUrl}/auth/reset-password?token=${token}&email=${user.email}`;
+    const resetLink = `${config.frontendUrl}/auth/reset-password?token=${token}&email=${user.email}`;
 
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 30);
@@ -128,7 +128,7 @@ class UserService {
     });
 
     //TODO: SEND EMAIL
-    // const resend = new Resend(config.app.resendKey);
+    // const resend = new Resend(config.resendKey);
 
     // const res = await resend.emails.send({
     //   from: "Resend Dev <onboarding@resend.dev>",
