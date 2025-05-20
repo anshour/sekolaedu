@@ -21,7 +21,7 @@ const config = {
   awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 
   dbHost: process.env.DB_HOST,
-  dbPort: process.env.DB_PORT,
+  dbPort: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
   dbUser: process.env.DB_USER,
   dbPassword: process.env.DB_PASSWORD,
   dbName: process.env.DB_NAME,
