@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc && tsc-alias",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "migrate": "knex migrate:latest",
     "migrate:status": "knex migrate:status",
     "migrate:rollback": "knex migrate:rollback",
@@ -37,7 +37,7 @@
     "pino-pretty": "^13.0.0",
     "qs": "^6.14.0",
     "uuid": "^11.1.0",
-    "zod": "^3.24.4"
+    "zod": "^3.25.8"
   },
   "devDependencies": {
     "@types/compression": "^1.7.5",
@@ -46,7 +46,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
     "prettier": "^3.5.3",
-    "ts-node": "^10.9.2",
+    "ts-node": "^10.9.2", 
     "tsc-alias": "^1.8.16",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
