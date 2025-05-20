@@ -1,6 +1,6 @@
 import config from "./src/config";
 
-require("ts-node/register");
+require("tsx");
 
 const knexConfig = {
   client: "pg",
