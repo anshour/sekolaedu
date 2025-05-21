@@ -4,14 +4,14 @@ export async function up(knex: Knex) {
   return knex.schema
     .createTable("permissions", (table) => {
       table.increments("id").primary();
-      table.string("name").unique().notNullable();
+      table.string("name", 100).unique().notNullable();
       table.string("description").nullable();
       table.timestamps(true, true);
     })
 
     .createTable("roles", (table) => {
       table.increments("id").primary();
-      table.string("name").unique().notNullable();
+      table.string("name", 25).unique().notNullable();
       table.timestamps(true, true);
     })
 
@@ -50,6 +50,6 @@ export async function down(knex: Knex) {
     .dropTableIfExists("role_permissions")
     .dropTableIfExists("user_permissions")
     .dropTableIfExists("user_roles")
-    .dropTableIfExists("roles")
-    .dropTableIfExists("permissions");
+    .dropTableIfExists("permissions")
+    .dropTableIfExists("roles");
 }

@@ -5,7 +5,7 @@ export async function up(knex: Knex) {
     table.increments("id").primary();
     table.string("name", 255).notNullable();
     table.string("email", 150).notNullable().unique().index();
-    table.string("password", 255).notNullable();
+    table.string("password", 180).notNullable();
     table.boolean("is_active").defaultTo(true);
     table.timestamps(true, true);
   });
