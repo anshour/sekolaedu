@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import config from "~/config";
 import authRouter from "./routers/auth";
 import permissionRouter from "./routers/permission";
+import roleRouter from "./routers/role";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(morgan("dev"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/permissions", permissionRouter);
+app.use("/api/roles", roleRouter);
 
 app.get("/", (req, res) => {
   res.json({
