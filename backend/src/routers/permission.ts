@@ -13,49 +13,15 @@ import {
 
 const permissionRouter = express.Router();
 
-permissionRouter.post(
-  "/",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  createPermission,
-);
-permissionRouter.get(
-  "/:id",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  getPermission,
-);
-permissionRouter.put(
-  "/:id",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  updatePermission,
-);
-permissionRouter.delete(
-  "/:id",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  deletePermission,
-);
-permissionRouter.get(
-  "/",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  getAllPermissions,
-);
+permissionRouter.use(authenticate, authorizePermission("manage_permissions"));
 
-permissionRouter.post(
-  "/add-permission",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  addPermissionToUser,
-);
+permissionRouter.post("/", createPermission);
+permissionRouter.get("/:id", getPermission);
+permissionRouter.put("/:id", updatePermission);
+permissionRouter.delete("/:id", deletePermission);
+permissionRouter.get("/", getAllPermissions);
 
-permissionRouter.delete(
-  "/delete-permission",
-  authenticate,
-  authorizePermission("manage_permissions"),
-  deletePermissionFromUser,
-);
+// permissionRouter.post("/add-permission", addPermissionToUser);
+// permissionRouter.delete("/delete-permission", deletePermissionFromUser);
 
 export default permissionRouter;
