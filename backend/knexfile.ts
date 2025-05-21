@@ -15,6 +15,9 @@ const knexConfig = {
   migrations: {
     directory: "./src/migrations",
   },
+  seeds: {
+    directory: "./src/seeds",
+  },
   searchPath: [config.dbSchema],
 };
 
