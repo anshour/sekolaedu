@@ -4,9 +4,6 @@ import { User } from "../models/user";
 import knex from "../database/connection";
 import config from "../config";
 import { HttpError } from "../types/http-error";
-// import { Resend } from "resend";
-// import config from "src/constants/config";
-// import ResetPasswordEmail from "src/templates/email/reset-password";
 
 class UserService {
   constructor() {}
@@ -14,20 +11,61 @@ class UserService {
   static async createUser(user: Partial<User>): Promise<User> {
     const hashedPassword = await this.hashPassword(user.password!);
 
-    const [userId] = await knex("users").insert({
-      ...user,
-      password: hashedPassword,
-    });
+    const [insertedUser] = await knex("users")
+      .insert({
+        ...user,
+        password: hashedPassword,
+      })
+      .returning("id");
 
-    return { id: userId, ...user } as User;
+    return { id: insertedUser.id, ...user } as User;
   }
 
   static async getById(id: number): Promise<User | null> {
-    return knex("users").where({ id }).first();
+    const user = await knex("users")
+      .select("id", "name", "email", "role_id")
+      .where({ id })
+      .first();
+
+    if (!user) {
+      return null;
+    }
+
+    const roleName = await this.getRoleNameById(user.role_id);
+
+    return {
+      ...user,
+      role_name: roleName,
+    };
   }
 
   static async getByEmail(email: string): Promise<User | null> {
-    return knex("users").where({ email }).first();
+    const user = await knex("users")
+      .select("id", "name", "email", "role_id", "password")
+      .where({ email })
+      .first();
+
+    if (!user) {
+      return null;
+    }
+
+    const roleName = await this.getRoleNameById(user.role_id);
+
+    return {
+      ...user,
+      role_name: roleName,
+    };
+  }
+
+  private static async getRoleNameById(
+    roleId: number | null,
+  ): Promise<string | null> {
+    if (!roleId) {
+      return null;
+    }
+
+    const role = await knex("roles").where({ id: roleId }).first();
+    return role ? role.name : null;
   }
 
   static async isEmailTaken(email: string): Promise<boolean> {
@@ -162,14 +200,31 @@ class UserService {
     return bcrypt.hash(password, 12);
   }
 
-  static async getPermissions(userId: number): Promise<string[]> {
-    const permissions = await knex("user_permissions")
+  static async getPermissions(
+    roleId: number | null,
+    userId: number,
+  ): Promise<string[]> {
+    const rolebasedPermissions = await knex("role_permissions")
+      .join("permissions", "role_permissions.permission_id", "permissions.id")
+      .where({ role_id: roleId })
+      .select(["permissions.name", "permissions.id"]);
+
+    const specificPermissions = await knex("user_permissions")
       .join("permissions", "user_permissions.permission_id", "permissions.id")
       .where({ user_id: userId })
-      .select("permissions.name")
-      .then((results) => results.map((row) => row.name));
+      .select(["permissions.name", "permissions.id"]);
 
-    return permissions;
+    const uniquePermissions = new Map();
+
+    rolebasedPermissions.forEach((permission) => {
+      uniquePermissions.set(permission.id, permission.name);
+    });
+
+    specificPermissions.forEach((permission) => {
+      uniquePermissions.set(permission.id, permission.name);
+    });
+
+    return Array.from(uniquePermissions.values());
   }
 
   static async addPermission(

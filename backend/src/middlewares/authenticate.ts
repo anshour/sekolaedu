@@ -21,7 +21,10 @@ async function authenticate(req: Request, res: Response, next: NextFunction) {
       throw new HttpError("Invalid user", 401);
     }
 
-    const permissions = await UserService.getPermissions(decoded.user_id);
+    const permissions = await UserService.getPermissions(
+      user.role_id,
+      user.id,
+    );
 
     Object.assign(req, { user: { ...user, permissions } });
 

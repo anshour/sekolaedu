@@ -7,7 +7,11 @@ function authorizeRole(roles: string | string[]) {
   return function (req: Request, res: Response, next: NextFunction) {
     const user = req.user!;
 
-    if (!roleArray.includes(user.role)) {
+    if (!user.role_name) {
+      throw new HttpError("User has no role assigned", 403);
+    }
+
+    if (!roleArray.includes(user.role_name)) {
       throw new HttpError(`Required roles: ${roleArray.join(", ")}`, 403);
     }
 

@@ -16,45 +16,45 @@ const permissionRouter = express.Router();
 permissionRouter.post(
   "/",
   authenticate,
-  authorizePermission("create-permission"),
+  authorizePermission("manage_permissions"),
   createPermission,
 );
 permissionRouter.get(
   "/:id",
   authenticate,
-  authorizePermission("read-permission"),
+  authorizePermission("manage_permissions"),
   getPermission,
 );
 permissionRouter.put(
   "/:id",
   authenticate,
-  authorizePermission("update-permission"),
+  authorizePermission("manage_permissions"),
   updatePermission,
 );
 permissionRouter.delete(
   "/:id",
   authenticate,
-  authorizePermission("delete-permission"),
+  authorizePermission("manage_permissions"),
   deletePermission,
 );
 permissionRouter.get(
   "/",
   authenticate,
-  authorizePermission("read-permission"),
+  authorizePermission("manage_permissions"),
   getAllPermissions,
 );
 
 permissionRouter.post(
   "/add-permission",
   authenticate,
-  authorizePermission("update-permission"),
+  authorizePermission("manage_permissions"),
   addPermissionToUser,
 );
 
 permissionRouter.delete(
   "/delete-permission",
   authenticate,
-  authorizePermission("update-permission"),
+  authorizePermission("manage_permissions"),
   deletePermissionFromUser,
 );
 
