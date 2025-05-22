@@ -2,14 +2,21 @@ import { type Request, type Response } from "express";
 import validate from "~/utils/validate";
 import { z } from "zod";
 import RoleService from "~/services/role-service";
+import { paginationSchema } from "~/types/pagination";
+import { HttpError } from "~/types/http-error";
 
 const roleController = {
   async createRole(req: Request, res: Response) {
     const schema = z.object({
       name: z.string(),
-      description: z.string(),
     });
     const data = validate(schema, req.body);
+
+    const isNameTaken = await RoleService.isNameTaken(data.name);
+
+    if (isNameTaken) {
+      throw new HttpError("Role name already taken", 400);
+    }
     const role = await RoleService.create(data);
     res.status(201).json(role);
   },
@@ -26,7 +33,6 @@ const roleController = {
   async updateRole(req: Request, res: Response) {
     const schema = z.object({
       name: z.string(),
-      description: z.string(),
     });
     const data = validate(schema, req.body);
     const role = await RoleService.update(Number(req.params.id), data);
@@ -43,7 +49,9 @@ const roleController = {
   },
 
   async getAllRoles(req: Request, res: Response) {
-    const roles = await RoleService.getAll();
+    const params = validate(paginationSchema, req.query);
+
+    const roles = await RoleService.getAll(params);
     res.status(200).json(roles);
   },
 };

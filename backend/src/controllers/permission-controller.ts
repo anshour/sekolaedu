@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import { z } from "zod";
 import PermissionService from "~/services/permission-service";
+import { HttpError } from "~/types/http-error";
 import validate from "~/utils/validate";
 
 const permissionController = {
@@ -10,6 +11,11 @@ const permissionController = {
       description: z.string(),
     });
     const data = validate(schema, req.body);
+
+    const isNameTaken = await PermissionService.isNameTaken(data.name);
+    if (isNameTaken) {
+      throw new HttpError("Permission name already taken", 400);
+    }
     const permission = await PermissionService.create(data);
     res.status(201).json(permission);
   },

@@ -2,8 +2,8 @@ import db from "../database/connection";
 
 class PermissionService {
   static async create(data: any) {
-    const [permissionId] = await db("permissions").insert(data).returning("id");
-    return { id: permissionId, ...data };
+    const [res] = await db("permissions").insert(data).returning("id");
+    return { id: res.id, ...data };
   }
 
   static async getById(id: number) {
@@ -21,6 +21,11 @@ class PermissionService {
 
   static async getAll() {
     return await db("permissions").select("*");
+  }
+
+  static async isNameTaken(name: string): Promise<boolean> {
+    const permission = await db("permissions").where({ name }).first();
+    return permission !== undefined;
   }
 
   static async attachPermissionToUser(userId: number, permissionId: number) {

@@ -2,15 +2,35 @@ import { paginate } from "~/utils/pagination";
 import db from "../database/connection";
 import { Role } from "~/models/role";
 import { attachManyToMany } from "~/utils/attach-relation";
+import { PaginationParams, PaginationResult } from "~/types/pagination";
 
 class RoleService {
   static async create(data: any) {
     const [res] = await db("roles").insert(data).returning("id");
-    return { id: res[0].id, ...data };
+
+    console.log("Role created with ID:", res);
+    return { id: res.id, ...data };
   }
 
   static async getById(id: number) {
-    return await db("roles").where({ id }).first();
+    const role = await db("roles").where({ id }).first();
+
+    const [roleWithPermissions] = await attachManyToMany([role], {
+      parentIdKey: "id",
+      relationTable: "role_permissions",
+      parentForeignKey: "role_id",
+      relatedForeignKey: "permission_id",
+      relatedTable: "permissions",
+      relatedFields: ["id", "name", "description"],
+      outputKey: "permissions",
+    });
+
+    return roleWithPermissions;
+  }
+
+  static async isNameTaken(name: string): Promise<boolean> {
+    const role = await db("roles").where({ name }).first();
+    return role !== undefined;
   }
 
   static async update(id: number, data: any) {
@@ -22,25 +42,14 @@ class RoleService {
     await db("roles").where({ id }).delete();
   }
 
-  static async getAll() {
+  static async getAll(
+    params: PaginationParams,
+  ): Promise<PaginationResult<Role>> {
     const query = db("roles").select("*");
 
-    const roles = await paginate<Role>(query, {
-      page: 1,
-      limit: 10,
-    });
+    const data = await paginate<Role>(query, params);
 
-    const rolesWithPermissions = await attachManyToMany(roles.data, {
-      parentIdKey: "id",
-      relationTable: "role_permissions",
-      parentForeignKey: "role_id",
-      relatedForeignKey: "permission_id",
-      relatedTable: "permissions",
-      relatedFields: ["id", "name", "description"],
-      outputKey: "permissions",
-    });
-
-    return { ...roles, data: rolesWithPermissions };
+    return data;
   }
 }
 
