@@ -1,6 +1,7 @@
 import { paginate } from "~/utils/pagination";
 import db from "../database/connection";
 import { Role } from "~/models/role";
+import { attachManyToMany } from "~/utils/attach-relation";
 
 class RoleService {
   static async create(data: any) {
@@ -29,53 +30,17 @@ class RoleService {
       limit: 10,
     });
 
-    // Get all role IDs in one array
-    const roleIds = roles.data.map((role) => role.id);
-
-    // Get all role-permission mappings in a single query
-    const rolePermissions = await db("role_permissions")
-      .whereIn("role_id", roleIds)
-      .select(["role_id", "permission_id"]);
-
-    // Get all unique permission IDs
-    const uniquePermissionIds = [
-      ...new Set(rolePermissions.map((rp) => rp.permission_id)),
-    ];
-
-    // Fetch all required permissions in a single query
-    const permissions =
-      uniquePermissionIds.length > 0
-        ? await db("permissions")
-            .whereIn("id", uniquePermissionIds)
-            .select(["id", "name", "description"])
-        : [];
-
-    // Create a lookup map for permissions
-    const permissionsMap = permissions.reduce(
-      (map, permission) => {
-        map[permission.id] = permission;
-        return map;
-      },
-      {} as Record<number, any>,
-    );
-
-    // Map permissions to each role
-    const roleWithPermissions = roles.data.map((role) => {
-      const permissionIds = rolePermissions
-        .filter((rp) => rp.role_id === role.id)
-        .map((rp) => rp.permission_id);
-
-      const rolePermissionDetails = permissionIds.map(
-        (id) => permissionsMap[id],
-      );
-
-      return {
-        ...role,
-        permissions: rolePermissionDetails || [],
-      };
+    const rolesWithPermissions = await attachManyToMany(roles.data, {
+      parentIdKey: "id",
+      relationTable: "role_permissions",
+      parentForeignKey: "role_id",
+      relatedForeignKey: "permission_id",
+      relatedTable: "permissions",
+      relatedFields: ["id", "name", "description"],
+      outputKey: "permissions",
     });
 
-    return { ...roles, data: roleWithPermissions };
+    return { ...roles, data: rolesWithPermissions };
   }
 }
 
