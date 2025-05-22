@@ -23,17 +23,30 @@ class PermissionService {
     return await db("permissions").select("*");
   }
 
-  static async addPermissionToUser(userId: number, permissionId: number) {
+  static async attachPermissionToUser(userId: number, permissionId: number) {
     await db("user_permissions").insert({
       user_id: userId,
       permission_id: permissionId,
     });
   }
 
-  static async deletePermissionFromUser(userId: number, permissionId: number) {
+  static async detachPermissionFromUser(userId: number, permissionId: number) {
     await db("user_permissions")
       .where({ user_id: userId, permission_id: permissionId })
       .delete();
+  }
+
+  static async detachPermissionFromRole(roleId: number, permissionId: number) {
+    await db("role_permissions")
+      .where({ role_id: roleId, permission_id: permissionId })
+      .delete();
+  }
+
+  static async attachPermissionToRole(roleId: number, permissionId: number) {
+    await db("role_permissions").insert({
+      role_id: roleId,
+      permission_id: permissionId,
+    });
   }
 }
 

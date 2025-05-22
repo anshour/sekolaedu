@@ -6,9 +6,9 @@ import morgan from "morgan";
 import { errorHandler, notFoundHandler } from "./utils/error-handler";
 import rateLimit from "express-rate-limit";
 import config from "~/config";
-import authRouter from "./routers/auth";
-import permissionRouter from "./routers/permission";
-import roleRouter from "./routers/role";
+import authRouter from "./routers/auth-router";
+import permissionRouter from "./routers/permission-router";
+import roleRouter from "./routers/role-router";
 
 const app = express();
 

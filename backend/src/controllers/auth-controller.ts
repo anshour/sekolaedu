@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
-import UserService from "~/services/user";
+import UserService from "~/services/user-service";
 import { HttpError } from "~/types/http-error";
 import validate from "~/utils/validate";
 
