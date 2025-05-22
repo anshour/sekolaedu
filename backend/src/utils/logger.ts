@@ -11,6 +11,16 @@ import dayjs from "dayjs";
 
 // const logger = pino({ level: "info" }, pino.destination(getLogFileName()));
 
-const logger = pino({ level: "info" });
+const logger = pino({
+  level: "info",
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      levelFirst: true,
+      translateTime: "yyyy-mm-dd HH:MM:ss",
+    },
+  },
+});
 
 export default logger;
