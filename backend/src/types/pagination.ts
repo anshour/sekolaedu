@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export interface PaginationResult<T> {
   data: T[];
@@ -11,8 +11,8 @@ export interface PaginationResult<T> {
 export const paginationSchema = z.object({
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().default(15),
-  filter: z.record(z.any()).optional(),
-  sort: z.record(z.union([z.literal("asc"), z.literal("desc")])).optional(),
+  filter: z.record(z.string(), z.any()).optional(),
+  sort: z.enum(["asc", "desc"]).optional(),
 });
 
 export type PaginationParams = z.infer<typeof paginationSchema>;

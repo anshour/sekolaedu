@@ -1,5 +1,5 @@
 import { type Request, type Response } from "express";
-import { z } from "zod";
+import { z } from "zod/v4";
 import PermissionService from "~/services/permission-service";
 import { HttpError } from "~/types/http-error";
 import validate from "~/utils/validate";

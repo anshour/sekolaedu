@@ -1,4 +1,4 @@
-import { ZodSchema, type infer as zodInfer } from "zod";
+import { ZodSchema, type infer as zodInfer } from "zod/v4";
 import { HttpValidationError } from "~/types/http-error";
 
 const validate = <T extends ZodSchema>(

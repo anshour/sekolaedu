@@ -12,7 +12,11 @@ export interface ValidationError {
 }
 
 export interface HttpError
-  extends AxiosError<{ message?: string; errors?: ValidationError[] }> {
+  extends AxiosError<{
+    message?: string;
+    status_code?: number;
+    errors?: ValidationError[];
+  }> {
   isHandled: boolean;
 }
 

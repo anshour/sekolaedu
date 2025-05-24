@@ -1,6 +1,6 @@
 import { type Request, type Response } from "express";
 import validate from "~/utils/validate";
-import { z } from "zod";
+import { z } from "zod/v4";
 import RoleService from "~/services/role-service";
 import { paginationSchema } from "~/types/pagination";
 import { HttpError } from "~/types/http-error";
