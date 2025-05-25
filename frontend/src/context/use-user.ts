@@ -5,7 +5,8 @@ interface UserStore {
   user: null | {
     id: number;
     name: string;
-    role: string;
+    role_id: number;
+    role_name: string;
     email: string;
     photo: string;
     permissions?: string[];
