@@ -14,6 +14,7 @@ import Link from "next/link";
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu";
 
 const SingleMenuItem = ({ menu }: { menu: MenuItemState }) => {
+  // TODO: HANDLE EXTERNAL LINKS 
   return (
     <Link href={menu.path}>
       <Box
@@ -48,7 +49,6 @@ const SingleMenuItem = ({ menu }: { menu: MenuItemState }) => {
 };
 
 const MultipleMenuItem = ({ menu }: { menu: MenuItemState }) => {
-  const router = useRouter();
   const { open, onToggle, onOpen } = useDisclosure();
 
   useEffect(() => {
@@ -56,14 +56,6 @@ const MultipleMenuItem = ({ menu }: { menu: MenuItemState }) => {
       onOpen();
     }
   }, [menu.selected, onOpen]);
-
-  const handleClick = (path: string) => {
-    if (path.startsWith("http")) {
-      return (window.location.href = path);
-    }
-
-    return router.push(path);
-  };
 
   return (
     <>
@@ -158,15 +150,49 @@ const Sidebar = ({
 
   const [menus, setMenus] = useState<MenuItemState[]>([]);
 
+  const handleClickLogout = () => {
+    useUser.setState({ user: null });
+    router.push("/auth/login");
+  };
+
   useEffect(() => {
     if (isDesktop !== isOpen) {
-      isDesktop ? onOpen() : onClose();
+      if (isDesktop) {
+        onOpen();
+      } else {
+        onClose();
+      }
     }
 
     const hasPermission = (permission: string) =>
       !permission || user?.permissions?.includes(permission);
 
-    const isPathSelected = (path: string) => pathname.startsWith(path);
+    // Get all possible paths for exact matching
+    const getAllPaths = (menus: MenuItem[]) => {
+      const paths: string[] = [];
+      menus.forEach((menu) => {
+        if (menu.type === "single") {
+          paths.push(menu.path);
+        } else if (menu.type === "multiple" && menu.nestedMenus) {
+          menu.nestedMenus.forEach((nested) => {
+            if (hasPermission(nested.permission)) {
+              paths.push(nested.path);
+            }
+          });
+        }
+      });
+      return paths.sort((a, b) => b.length - a.length); // Sort by length desc for most specific first
+    };
+
+    // Find the most specific matching path
+    const findMostSpecificPath = (pathname: string, allPaths: string[]) => {
+      return allPaths.find((path) => pathname.startsWith(path)) || null;
+    };
+
+    const allPaths = getAllPaths(initialMenus);
+    const selectedPath = findMostSpecificPath(pathname, allPaths);
+
+    const isPathSelected = (path: string) => path === selectedPath;
 
     const processMenu = (menu: any) => {
       if (menu.type === "single") {
@@ -208,7 +234,7 @@ const Sidebar = ({
       );
 
     setMenus(menuState);
-  }, [isDesktop, pathname, user?.permissions]);
+  }, [isDesktop, pathname, user?.permissions, initialMenus]);
 
   return (
     <>
@@ -315,6 +341,7 @@ const Sidebar = ({
               width="200px"
               value="logout"
               color="fg.error"
+              onClick={handleClickLogout}
               _hover={{ bg: "bg.error", color: "fg.error" }}
             >
               Logout
