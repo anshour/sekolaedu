@@ -8,15 +8,22 @@ import { useEffect } from "react";
 export default function Page() {
   const isAuthenticated = useUser((state) => state.isAuthenticated());
   const router = useRouter();
+  const redirectUrl = (router.query.redirect as string) || "/home";
 
   const handleLoginSuccess = (res: any) => {
     localStorage.setItem("token", res.data.token);
     useUser.setState({ user: res.data.user });
   };
 
-  // useEffect(() => {
-  //   router.push("/home");
-  // }, [isAuthenticated]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else {
+        router.push("/home");
+      }
+    }
+  }, [isAuthenticated, router, redirectUrl]);
 
   return (
     <>
@@ -32,9 +39,10 @@ export default function Page() {
                     password: "",
                   }}
                   api="/auth/login"
-                  nextPage="/home"
+                  nextPage={redirectUrl}
                   successMessage="Login success"
                   onSuccess={handleLoginSuccess}
+                  // onError={handleLoginError}
                 >
                   {({ isLoading, formRegister, formErrors }) => (
                     <SimpleGrid gap="3" columns={1}>
