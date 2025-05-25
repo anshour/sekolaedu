@@ -4,7 +4,7 @@ export interface User {
   role_id: number | null;
   role_name: string | null;
   email: string;
-  password: string;
+  password?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
