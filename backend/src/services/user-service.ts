@@ -80,13 +80,20 @@ class UserService {
       throw new HttpError("Invalid email or password", 401);
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password!);
 
     if (!isPasswordValid) {
       throw new HttpError("Invalid email or password", 401);
     }
 
-    const { password: userPassword, ...userData } = user;
+    const permissions = await this.getPermissions(user.role_id, user.id);
+
+    delete user.password;
+
+    const userData = {
+      ...user,
+      permissions,
+    };
 
     return userData;
   }
