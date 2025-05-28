@@ -4,6 +4,10 @@ import { User } from "../models/user";
 import knex from "../database/connection";
 import config from "../config";
 import { HttpError } from "../types/http-error";
+import { PaginationParams, PaginationResult } from "~/types/pagination";
+import { paginate } from "~/utils/pagination";
+import { attachBelongsTo } from "~/utils/attach-relation";
+import { Role } from "~/models/role";
 
 class UserService {
   constructor() {}
@@ -185,6 +189,18 @@ class UserService {
     //   logger.error(res.error);
     //   throw new HttpError("Error sending email", 500);
     // }
+  }
+
+  static async getAll(
+    params: PaginationParams,
+  ): Promise<PaginationResult<User>> {
+    const query = knex("users")
+      .join("roles", "users.role_id", "roles.id")
+      .select(["users.*", "roles.name AS role_name", "roles.id AS role_id"]);
+
+    const paginatedData = await paginate<User>(query, params, "users.id");
+
+    return paginatedData;
   }
 
   static async updateUser(
