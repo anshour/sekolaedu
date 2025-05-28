@@ -1,4 +1,10 @@
-import { Home as HomeIcon, Settings } from "lucide-react";
+import {
+  Home as HomeIcon,
+  Logs,
+  Settings,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import Sidebar, { MenuItem } from "./sidebar";
 import {
   Box,
@@ -20,7 +26,27 @@ const menus: MenuItem[] = [
     permission: "",
     icon: HomeIcon,
   },
-
+  {
+    name: "Accounts",
+    type: "single",
+    path: "/dashboard/admin/accounts",
+    permission: "",
+    icon: User,
+  },
+  {
+    name: "Authorization",
+    type: "single",
+    path: "/dashboard/admin/authorization",
+    permission: "",
+    icon: ShieldCheck,
+  },
+  {
+    name: "Logs",
+    type: "single",
+    path: "/dashboard/admin/logs",
+    permission: "",
+    icon: Logs,
+  },
   {
     name: "Settings",
     type: "single",
@@ -51,6 +77,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
   }, [user]);
+
+  useEffect(() => {
+    useUser.getState().refetchUser();
+  }, []);
 
   if (!user) {
     return null;
