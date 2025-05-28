@@ -1,17 +1,25 @@
+import { errorHandler, notFoundHandler } from "./utils/error-handler";
+import permissionRouter from "./routers/permission-router";
+import authRouter from "./routers/auth-router";
+import roleRouter from "./routers/role-router";
+import userRouter from "./routers/user-router";
+import rateLimit from "express-rate-limit";
+import compression from "compression";
+import config from "~/config";
 import express from "express";
 import helmet from "helmet";
-import cors from "cors";
-import compression from "compression";
 import morgan from "morgan";
-import { errorHandler, notFoundHandler } from "./utils/error-handler";
-import rateLimit from "express-rate-limit";
-import config from "~/config";
-import authRouter from "./routers/auth-router";
-import permissionRouter from "./routers/permission-router";
-import roleRouter from "./routers/role-router";
+import cors from "cors";
+import qs from "qs";
+
 
 const app = express();
 
+app.set("query parser", (str: string) => {
+  return qs.parse(str, {
+    // qs options
+  });
+});
 app.use(helmet());
 app.use(
   rateLimit({
@@ -33,6 +41,7 @@ app.use(morgan("dev"));
 app.use("/api/auth", authRouter);
 app.use("/api/permissions", permissionRouter);
 app.use("/api/roles", roleRouter);
+app.use("/api/users", userRouter);
 
 app.get("/", (req, res) => {
   res.json({
