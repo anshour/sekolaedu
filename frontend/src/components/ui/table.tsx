@@ -9,6 +9,7 @@ import {
   VStack,
   Text,
   Skeleton,
+  TableRowProps,
 } from "@chakra-ui/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo } from "react";
@@ -112,6 +113,38 @@ export const TableBody = ({
       />
       {children}
     </Table.Body>
+  );
+};
+
+interface TableRowDataProps extends Omit<TableRowProps, "columns"> {
+  data: any[];
+  columns: Array<{
+    accessor: string;
+    key?: string;
+    children?: (item: any, index: number) => React.ReactNode;
+    textAlign?: "left" | "center" | "right";
+  }>;
+}
+export const TableRowData = ({ data, columns }: TableRowDataProps) => {
+  return (
+    <>
+      {data?.map((item, index) => (
+        <Table.Row key={item.key || item.id || index}>
+          {columns.map((col) => (
+            <Table.Cell
+              key={col.key || col.accessor}
+              textAlign={col.textAlign || "left"}
+            >
+              {!!col.children ? (
+                col.children(item, index) // Custom rendering for the cell
+              ) : (
+                <span>{item[col.accessor]}</span>
+              )}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+      ))}
+    </>
   );
 };
 

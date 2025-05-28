@@ -4,6 +4,7 @@ import {
   TableBody,
   TableColumnHeader,
   TableContainer,
+  TableRowData,
 } from "@/components/ui/table";
 import { useFetchUser } from "@/hooks/use-fetch-users";
 import useSmartRouter from "@/hooks/use-smart-router";
@@ -42,7 +43,7 @@ export default function Page() {
 
   return (
     <>
-      <Card.Root>
+      <Card.Root mx="auto" w="full" maxW="breakpoint-lg">
         <Card.Body>
           <Heading>Account List</Heading>
           <br />
@@ -79,17 +80,46 @@ export default function Page() {
                 </Table.Row>
               </Table.Header>
               <TableBody isEmpty={isEmpty} isFetching={isFetching} cols={5}>
-                {users?.data?.map((user, index) => (
-                  <Table.Row key={user.id}>
-                    <Table.Cell textAlign="center">{index + 1}</Table.Cell>
-                    <Table.Cell>{user.name}</Table.Cell>
-                    <Table.Cell>{user.email}</Table.Cell>
-                    <Table.Cell>{user.role_name}</Table.Cell>
-                    <Table.Cell textAlign="center">
-                      <Button variant="outline">View</Button>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
+                <TableRowData
+                  data={users?.data}
+                  columns={[
+                    {
+                      accessor: "id",
+                      key: "no",
+                      textAlign: "center",
+                      children: (item, index) =>
+                        index + 1 + (page - 1) * users.limit,
+                    },
+                    {
+                      accessor: "name",
+                      key: "name",
+                    },
+                    {
+                      accessor: "email",
+                      key: "email",
+                    },
+                    {
+                      accessor: "role_name",
+                      key: "role_name",
+                    },
+                    {
+                      accessor: "id",
+                      key: "action",
+                      textAlign: "center",
+                      children: (item) => (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            router.push(`/dashboard/admin/accounts/${item.id}`)
+                          }
+                        >
+                          Detail
+                        </Button>
+                      ),
+                    },
+                  ]}
+                />
               </TableBody>
             </Table.Root>
           </TableContainer>
