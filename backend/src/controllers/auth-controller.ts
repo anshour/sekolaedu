@@ -7,7 +7,7 @@ import validate from "~/utils/validate";
 const authController = {
   async login(req: Request, res: Response) {
     const schema = z.object({
-      email: z.string().email(),
+      email: z.email(),
       password: z.string(),
     });
 
@@ -22,7 +22,7 @@ const authController = {
   async register(req: Request, res: Response) {
     const schema = z.object({
       name: z.string().min(3),
-      email: z.string().email(),
+      email: z.email(),
       password: z.string().min(6),
       password_confirmation: z
         .string()
@@ -49,7 +49,7 @@ const authController = {
   async forgotPassword(req: Request, res: Response) {
     //TODO: ADD RATE LIMITER
     const schema = z.object({
-      email: z.string().email(),
+      email: z.email(),
     });
 
     const { email } = validate(schema, req.body);
@@ -67,7 +67,7 @@ const authController = {
 
   async resetPassword(req: Request, res: Response) {
     const schema = z.object({
-      email: z.string().email(),
+      email: z.email(),
       password: z.string(),
       password_confirmation: z
         .string()
@@ -92,17 +92,15 @@ const authController = {
   },
 
   async getCurrentUser(req: Request, res: Response) {
-    // @ts-ignore
     const user = req.user;
     res.json({ user });
   },
 
   async updateUser(req: Request, res: Response) {
-    // @ts-ignore
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const schema = z.object({
       name: z.string().min(3),
-      email: z.string().email(),
+      email: z.email(),
     });
 
     const updateData = validate(schema, req.body);
