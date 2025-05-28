@@ -1,8 +1,5 @@
-import {
-  createSystem,
-  defineConfig,
-  defaultConfig,
-} from "@chakra-ui/react";
+import { createSystem, defineConfig, defaultConfig } from "@chakra-ui/react";
+import { slotRecipes } from "./slot-recipes";
 
 const customConfig = defineConfig({
   theme: {
@@ -12,6 +9,7 @@ const customConfig = defineConfig({
         body: { value: "'Inter Variable', sans-serif" },
       },
     },
+    slotRecipes,
   },
 });
 
