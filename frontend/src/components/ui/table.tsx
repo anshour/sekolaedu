@@ -12,7 +12,11 @@ import {
   TableRowProps,
 } from "@chakra-ui/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useRouter } from "next/router";
 import { useMemo } from "react";
+
+export const tableSequence = (index: number, page: number, limit: number) =>
+  index + 1 + (page - 1) * limit;
 
 export const TableContainer = (props: BoxProps) => {
   return (
@@ -33,6 +37,10 @@ interface TableHeaderProps extends TableColumnHeaderProps {
   name?: string;
   sortState?: "asc" | "desc" | null;
 }
+
+export const TableHeader = () => {
+  return <></>;
+};
 
 export const TableColumnHeader = ({
   enableSort = false,
@@ -117,7 +125,8 @@ export const TableBody = ({
 };
 
 interface TableRowDataProps extends Omit<TableRowProps, "columns"> {
-  data: any[];
+  data: Record<string, any>[];
+  detailPath?: string;
   columns: Array<{
     accessor: string;
     key?: string;
@@ -125,11 +134,29 @@ interface TableRowDataProps extends Omit<TableRowProps, "columns"> {
     textAlign?: "left" | "center" | "right";
   }>;
 }
-export const TableRowData = ({ data, columns }: TableRowDataProps) => {
+export const TableRowData = ({
+  data,
+  detailPath,
+  columns,
+}: TableRowDataProps) => {
+  const isClickable = !!detailPath;
+  const router = useRouter();
+
   return (
     <>
       {data?.map((item, index) => (
-        <Table.Row key={item.key || item.id || index}>
+        <Table.Row
+          key={item.key || item.id || index}
+          _hover={{
+            cursor: isClickable ? "pointer" : "default",
+            bgColor: isClickable ? "gray.100" : "none",
+          }}
+          onClick={() =>
+            isClickable && detailPath
+              ? router.push(detailPath.replace(":key", item.id || item.key))
+              : null
+          }
+        >
           {columns.map((col) => (
             <Table.Cell
               key={col.key || col.accessor}

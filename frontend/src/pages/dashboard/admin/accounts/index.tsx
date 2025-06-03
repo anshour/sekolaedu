@@ -1,3 +1,4 @@
+import AccountListFilter from "@/components/feature/account-list-filter";
 import AdminLayout from "@/components/layout/admin-layout";
 import { StandardPagination } from "@/components/ui/pagination";
 import {
@@ -5,10 +6,24 @@ import {
   TableColumnHeader,
   TableContainer,
   TableRowData,
+  tableSequence,
 } from "@/components/ui/table";
 import { useFetchUser } from "@/hooks/use-fetch-users";
 import useSmartRouter from "@/hooks/use-smart-router";
-import { Button, Card, Heading, Table } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Collapsible,
+  Flex,
+  Heading,
+  IconButton,
+  Table,
+  Text,
+} from "@chakra-ui/react";
+import { ChevronDown, CircleArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Page() {
@@ -21,14 +36,14 @@ export default function Page() {
     name: null,
     email: null,
     role_name: null,
+    is_active: null,
   });
 
   const { users, isFetching, isEmpty } = useFetchUser({
     page,
-    sort: {
-      name: sortState.name,
-      email: sortState.email,
-      role_name: sortState.role_name,
+    sort: sortState,
+    filter: {
+      search: (router.query.search as string) || "",
     },
   });
 
@@ -41,12 +56,22 @@ export default function Page() {
     console.log(`Sorting by ${column} in ${direction} order`);
   };
 
+  const handleFilter = (data: Record<string, any>) => {
+    router.updateQuery(data);
+  };
   return (
     <>
       <Card.Root mx="auto" w="full" maxW="breakpoint-lg">
         <Card.Body>
           <Heading>Account List</Heading>
           <br />
+          <Box textAlign="right" mb="2">
+            <Link href="/dashboard/admin/accounts/create">
+              <Button>+ Tambah</Button>
+            </Link>
+          </Box>
+
+          <AccountListFilter onFilter={handleFilter} />
           <TableContainer>
             <Table.Root>
               <Table.Header>
@@ -73,13 +98,19 @@ export default function Page() {
                     name="role_name"
                     onSort={handleSort}
                   />
-
+                  <TableColumnHeader
+                    label="Active"
+                    enableSort
+                    sortState={sortState["is_active"]}
+                    name="is_active"
+                    onSort={handleSort}
+                  />
                   <TableColumnHeader textAlign="center">
                     Detail
                   </TableColumnHeader>
                 </Table.Row>
               </Table.Header>
-              <TableBody isEmpty={isEmpty} isFetching={isFetching} cols={5}>
+              <TableBody isEmpty={isEmpty} isFetching={isFetching} cols={6}>
                 <TableRowData
                   data={users?.data}
                   columns={[
@@ -87,8 +118,8 @@ export default function Page() {
                       accessor: "id",
                       key: "no",
                       textAlign: "center",
-                      children: (item, index) =>
-                        index + 1 + (page - 1) * users.limit,
+                      children: (_, index) =>
+                        tableSequence(index, page, users?.limit),
                     },
                     {
                       accessor: "name",
@@ -103,19 +134,28 @@ export default function Page() {
                       key: "role_name",
                     },
                     {
+                      accessor: "is_active",
+                      key: "is_active",
+                      children: (item) => (
+                        <Badge colorPalette={item.is_active ? "green" : "red"}>
+                          {item.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      ),
+                    },
+                    {
                       accessor: "id",
                       key: "action",
                       textAlign: "center",
                       children: (item) => (
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <IconButton
+                          variant="ghost"
+                          size="md"
                           onClick={() =>
                             router.push(`/dashboard/admin/accounts/${item.id}`)
                           }
                         >
-                          Detail
-                        </Button>
+                          <CircleArrowRight />
+                        </IconButton>
                       ),
                     },
                   ]}

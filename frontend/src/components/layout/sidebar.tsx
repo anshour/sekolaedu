@@ -14,7 +14,7 @@ import Link from "next/link";
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu";
 
 const SingleMenuItem = ({ menu }: { menu: MenuItemState }) => {
-  // TODO: HANDLE EXTERNAL LINKS 
+  // TODO: HANDLE EXTERNAL LINKS
   return (
     <Link href={menu.path}>
       <Box
@@ -334,7 +334,12 @@ const Sidebar = ({
             </Flex>
           </MenuTrigger>
           <MenuContent>
-            <MenuItem width="200px" value="profile">
+            <MenuItem
+              as={Link}
+              href="/dashboard/admin/profile"
+              width="200px"
+              value="profile"
+            >
               Profile
             </MenuItem>
             <MenuItem

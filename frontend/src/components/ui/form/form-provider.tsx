@@ -3,7 +3,12 @@ import { handleMutationError } from "@/utils/new-error-handler";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import {
+  useFieldArray,
+  UseFieldArrayReturn,
+  useForm,
+  UseFormReturn,
+} from "react-hook-form";
 import toast from "react-hot-toast";
 
 export interface FormProviderProps {
@@ -15,12 +20,17 @@ export interface FormProviderProps {
   nextPage?: string;
   api: string; //TODO: ADD API BASED ON BACKEND (ONLY POST, PUT, PATCH)
   method?: "post" | "put" | "patch";
+  fieldArrays?: string[];
   children?: (props: {
     isLoading: boolean;
     form: UseFormReturn<Record<string, any>>;
     control: UseFormReturn<Record<string, any>>["control"];
     formErrors: Record<string, any>;
     formRegister: UseFormReturn<Record<string, any>>["register"];
+    fieldArrays?: Record<
+      string,
+      UseFieldArrayReturn<Record<string, any>, string, "id">
+    >;
   }) => ReactNode;
 }
 
@@ -33,11 +43,34 @@ export const FormProvider = ({
   method = "post",
   nextPage,
   api,
+  fieldArrays = [],
   children,
 }: FormProviderProps) => {
   const router = useRouter();
   const form = useForm({
     defaultValues,
+  });
+
+  // Automatically detect array fields from defaultValues if fieldArrays not provided
+  const detectedArrayFields =
+    fieldArrays.length > 0
+      ? fieldArrays
+      : Object.keys(defaultValues).filter((key) =>
+          Array.isArray(defaultValues[key])
+        );
+
+  // Create field array hooks for each detected array field
+  const fieldArrayHooks: Record<
+    string,
+    UseFieldArrayReturn<Record<string, any>, string, "id">
+  > = {};
+
+  detectedArrayFields.forEach((fieldName) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    fieldArrayHooks[fieldName] = useFieldArray({
+      control: form.control,
+      name: fieldName,
+    });
   });
 
   const mutation = useMutation({
@@ -82,6 +115,10 @@ export const FormProvider = ({
           control: form.control,
           formRegister: form.register,
           formErrors: form.formState.errors,
+          fieldArrays:
+            Object.keys(fieldArrayHooks).length > 0
+              ? fieldArrayHooks
+              : undefined,
         })}
     </form>
   );
