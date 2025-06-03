@@ -178,6 +178,6 @@ export const tableSlotRecipe = defineSlotRecipe({
   },
   defaultVariants: {
     variant: "line",
-    size: "sm",
+    size: "md",
   },
 });
