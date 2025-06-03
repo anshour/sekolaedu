@@ -6,8 +6,7 @@ import config from "../config";
 import { HttpError } from "../types/http-error";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 import { paginate } from "~/utils/pagination";
-import { attachBelongsTo } from "~/utils/attach-relation";
-import { Role } from "~/models/role";
+import emailService from "./email-service";
 
 class UserService {
   constructor() {}
@@ -175,20 +174,7 @@ class UserService {
       token: bcrypt.hashSync(token, 10),
     });
 
-    //TODO: SEND EMAIL
-    // const resend = new Resend(config.resendKey);
-
-    // const res = await resend.emails.send({
-    //   from: "Resend Dev <onboarding@resend.dev>",
-    //   to: user.email,
-    //   subject: "Reset Password Request",
-    //   react: ResetPasswordEmail({ resetLink }),
-    // });
-
-    // if (res.error !== null) {
-    //   logger.error(res.error);
-    //   throw new HttpError("Error sending email", 500);
-    // }
+    await emailService.sendPasswordResetEmail(user.email, resetLink);
   }
 
   static async getAll(
@@ -198,7 +184,23 @@ class UserService {
       .join("roles", "users.role_id", "roles.id")
       .select(["users.*", "roles.name AS role_name", "roles.id AS role_id"]);
 
-    const paginatedData = await paginate<User>(query, params, "users.id");
+    const { search = "", ...theRestFilter } = params.filter || {};
+    const cleanParams = {
+      ...params,
+      filter: theRestFilter,
+    };
+
+    if (search) {
+      query.where(function () {
+        this.where("users.name", "ILIKE", `%${search}%`).orWhere(
+          "users.email",
+          "ILIKE",
+          `%${search}%`,
+        );
+      });
+    }
+
+    const paginatedData = await paginate<User>(query, cleanParams, "users.id");
 
     return paginatedData;
   }
@@ -218,6 +220,35 @@ class UserService {
       chars.charAt(Math.floor(Math.random() * chars.length)),
     ).join("");
   }
+
+  static generateDefaultPassword(length: number = 8): string {
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*";
+
+    const allChars = lowercase + uppercase + numbers + symbols;
+
+    // Ensure at least one character from each category
+    let password = "";
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+
+    // Fill the rest randomly
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Shuffle the password to avoid predictable patterns
+    return password
+      .split("")
+      .sort(() => Math.random() - 0.5)
+      .join("");
+  }
+
+  // ...existing code...
 
   private static hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);

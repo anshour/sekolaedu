@@ -13,4 +13,6 @@ const userRouter = express.Router();
 // userRouter.delete("/:id", userController.deleteUser);
 userRouter.get("/", userController.getAllUsers);
 
+userRouter.post("/bulk", userController.bulkCreateUsers);
+
 export default userRouter;
