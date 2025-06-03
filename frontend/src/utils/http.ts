@@ -15,7 +15,7 @@ export interface HttpError
   extends AxiosError<{
     message?: string;
     status_code?: number;
-    errors?: ValidationError[];
+    issues?: ValidationError[];
   }> {
   isHandled: boolean;
 }
