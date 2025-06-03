@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { email } from "zod/v4";
 
 require("dotenv").config();
 
@@ -28,7 +29,13 @@ const config = {
   dbSsl: process.env.DB_SSL === "true",
   dbSchema: process.env.DB_SCHEMA ?? "public",
 
-  //   resendKey: process.env.RESEND_KEY ?? "",
+  emailFrom: process.env.EMAIL_FROM,
+  emailFromName: process.env.EMAIL_FROM_NAME,
+  smtpHost: process.env.SMTP_HOST,
+  smtpPort: process.env.SMTP_PORT,
+  smtpSecure: process.env.SMTP_SECURE === "true",
+  smtpUser: process.env.SMTP_USER,
+  smtpPassword: process.env.SMTP_PASSWORD,
 };
 
 export default config;
