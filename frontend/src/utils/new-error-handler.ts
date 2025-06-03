@@ -4,10 +4,10 @@ import toast from "react-hot-toast";
 export const handleMutationError = (error: HttpError) => {
   if (error.isHandled) return;
 
-  if (error.response?.data?.errors) {
-    const errors = error.response.data.errors;
+  if (error.response?.data?.issues) {
+    const issues = error.response.data.issues;
 
-    errors.forEach((valError) => {
+    issues.forEach((valError) => {
       toast.error(
         `${valError.path.join(".")}: ${valError.message.toLowerCase()}`
       );
