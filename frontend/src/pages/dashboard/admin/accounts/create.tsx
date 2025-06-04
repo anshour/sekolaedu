@@ -145,7 +145,7 @@ export default function Page() {
                         <Box textAlign="center">
                           <Button
                             size="sm"
-                            variant="plain"
+                            variant="subtle"
                             onClick={addEmptyItem}
                           >
                             + Tambah

@@ -15,14 +15,11 @@ import {
   Box,
   Button,
   Card,
-  Collapsible,
-  Flex,
   Heading,
   IconButton,
   Table,
-  Text,
 } from "@chakra-ui/react";
-import { ChevronDown, CircleArrowRight } from "lucide-react";
+import { CircleArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -70,7 +67,6 @@ export default function Page() {
               <Button>+ Tambah</Button>
             </Link>
           </Box>
-
           <AccountListFilter onFilter={handleFilter} />
           <TableContainer>
             <Table.Root>
