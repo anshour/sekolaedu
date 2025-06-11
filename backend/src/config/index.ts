@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { email } from "zod/v4";
 
 require("dotenv").config();
 

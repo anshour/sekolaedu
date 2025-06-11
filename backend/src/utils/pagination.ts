@@ -1,69 +1,49 @@
-import type { Knex } from "knex";
+import { count, SQL, Table } from "drizzle-orm";
+import db from "../database/connection";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 
-type CustomOrder = {
-  key: string;
-  values: (string | number)[];
+type PaginateOptions<T> = {
+  table: Table;
+  where?: (table: any) => SQL<unknown> | undefined;
+  with?: any;
+  orderBy?: (table: any) => any;
 };
 
 export async function paginate<T>(
-  queryBuilder: Knex.QueryBuilder,
   params: PaginationParams,
-  keyAlias = "id",
-  customOrders?: CustomOrder[],
+  options: PaginateOptions<T>,
 ): Promise<PaginationResult<T>> {
-  const { page, limit, filter, sort } = params;
+  const page = params.page || 1;
+  const limit = params.limit || 15;
   const offset = (page - 1) * limit;
 
-  // Create a base query to be reused
-  const baseQuery = queryBuilder.clone();
+  // Count total
+  const total = await db
+    .select({ count: count(), ...options.table })
+    .from(options.table)
+    .groupBy(options.table.id)
+    .where(options.where)
+    .then((result) => Number(result[0]?.count) || 0);
 
-  // Apply filters if provided
-  if (filter) {
-    Object.entries(filter).forEach(([key, value]) => {
-      baseQuery.where(key, value);
-    });
-  }
+  // Infer tableName from table object
+  const tableName = options.table[Symbol.for("drizzle:BaseName")] as string;
 
-  // Determine sort logic
-  const applySort = (qb: Knex.QueryBuilder) => {
-    // Apply multiple custom orders in sequence
-    if (customOrders && customOrders.length) {
-      customOrders.forEach((customOrder) => {
-        if (customOrder.values.length) {
-          const arrayStr = customOrder.values.join(",");
-          qb.orderByRaw(`array_position(array[${arrayStr}], ??)`, [
-            customOrder.key,
-          ]);
-        }
-      });
-    }
+  // Fetch paginated data
+  const data = await db.query[tableName].findMany({
+    where: options.where,
+    with: options.with,
+    orderBy: options.orderBy,
+    limit,
+    offset,
+  });
 
-    if (sort) {
-      Object.entries(sort).forEach(([key, direction]) => {
-        qb.orderBy(key, direction);
-      });
-    }
-  };
-
-  // Execute count query and data query in parallel
-  const [countResult, data] = await Promise.all([
-    baseQuery
-      .clone()
-      .clear("select")
-      .clear("order")
-      .count(`${keyAlias} as count`)
-      .first(),
-    baseQuery.clone().modify(applySort).limit(limit).offset(offset),
-  ]);
-
-  const total = Number(countResult?.count || 0);
+  const last_page = Math.ceil(total / limit);
 
   return {
     data,
     total,
-    limit,
     current_page: page,
-    last_page: Math.ceil(total / limit),
+    last_page,
+    limit,
   };
 }

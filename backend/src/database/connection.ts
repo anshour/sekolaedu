@@ -1,7 +1,10 @@
-import { default as baseKnex } from "knex";
-// @ts-ignore
-import knexConfig from "../../knexfile";
+import { PGlite } from "@electric-sql/pglite";
+import { drizzle } from "drizzle-orm/pglite";
+import * as schema from "./schema";
 
-const knex = baseKnex(knexConfig);
+// TODO: CHANGE THIS TO DATABASE PATH
+const client = new PGlite("./pgdata");
 
-export default knex;
+const db = drizzle({ client, schema });
+
+export default db;

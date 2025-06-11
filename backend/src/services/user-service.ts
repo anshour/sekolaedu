@@ -1,12 +1,19 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user";
-import knex from "../database/connection";
 import config from "../config";
 import { HttpError } from "../types/http-error";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import { paginate } from "~/utils/pagination";
 import emailService from "./email-service";
+import db from "../database/connection";
+import {
+  passwordResets,
+  roles,
+  userPermissions,
+  users,
+} from "~/database/schema";
+import { and, asc, count, desc, eq, ilike, or } from "drizzle-orm";
+import { paginate } from "~/utils/pagination";
 
 class UserService {
   constructor() {}
@@ -14,27 +21,41 @@ class UserService {
   static async createUser(user: Partial<User>): Promise<User> {
     const hashedPassword = await this.hashPassword(user.password!);
 
-    const [insertedUser] = await knex("users")
-      .insert({
-        ...user,
+    const defaultRoleId = 2; // STAFF
+    const [insertedUser] = await db
+      .insert(users)
+      .values({
+        name: user.name!,
+        email: user.email!,
+        role_id: user.role_id || defaultRoleId,
+        is_active: user.is_active ?? true,
         password: hashedPassword,
       })
-      .returning("id");
+      .returning({ id: users.id });
 
     return { id: insertedUser.id, ...user } as User;
   }
 
   static async getById(id: number): Promise<User | null> {
-    const user = await knex("users")
-      .select("id", "name", "email", "role_id")
-      .where({ id })
-      .first();
+    const user = await db.query.users.findFirst({
+      where: (users) => eq(users.id, id),
+      with: {
+        role: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
     if (!user) {
       return null;
     }
 
     const roleName = await this.getRoleNameById(user.role_id);
+
+    console.log("User found:", user);
 
     return {
       ...user,
@@ -43,10 +64,17 @@ class UserService {
   }
 
   static async getByEmail(email: string): Promise<User | null> {
-    const user = await knex("users")
-      .select("id", "name", "email", "role_id", "password")
-      .where({ email })
-      .first();
+    const user = await db.query.users.findFirst({
+      where: (users) => eq(users.email, email),
+      with: {
+        role: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
     if (!user) {
       return null;
@@ -67,7 +95,10 @@ class UserService {
       return null;
     }
 
-    const role = await knex("roles").where({ id: roleId }).first();
+    const role = await db.query.roles.findFirst({
+      where: (roles) => eq(roles.id, roleId),
+    });
+
     return role ? role.name : null;
   }
 
@@ -78,6 +109,8 @@ class UserService {
 
   static async authenticateUser(email: string, password: string): Promise<any> {
     const user = await this.getByEmail(email);
+
+    console.log("User found:", user);
 
     if (!user) {
       throw new HttpError("Invalid email or password", 401);
@@ -128,10 +161,12 @@ class UserService {
     password: string,
     token: string,
   ): Promise<void> {
-    const reset = await knex("password_resets")
-      .where({ user_id: user.id, email: user.email })
-      .orderBy("created_at", "desc")
-      .first();
+    const reset = await db.query.passwordResets.findFirst({
+      where: (password_resets) =>
+        eq(password_resets.user_id, user.id) &&
+        eq(password_resets.email, user.email),
+      orderBy: (password_resets) => password_resets.created_at,
+    });
 
     if (!reset) {
       throw new HttpError("Invalid or expired token", 400);
@@ -149,11 +184,14 @@ class UserService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    await knex("users")
-      .where({ id: user.id })
-      .update({ password: hashedPassword });
+    await db
+      .update(users)
+      .set({
+        password: hashedPassword,
+      })
+      .where(eq(users.id, user.id));
 
-    await knex("password_resets").where({ id: reset.id }).delete();
+    await db.delete(passwordResets).where(eq(passwordResets.id, reset.id));
   }
 
   static async sendResetPasswordEmail(user: User): Promise<void> {
@@ -163,11 +201,16 @@ class UserService {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 30);
 
-    await knex("password_resets")
-      .where({ email: user.email, user_id: user.id })
-      .delete();
+    await db
+      .delete(passwordResets)
+      .where(
+        and(
+          eq(passwordResets.email, user.email),
+          eq(passwordResets.user_id, user.id),
+        ),
+      );
 
-    await knex("password_resets").insert({
+    await db.insert(passwordResets).values({
       user_id: user.id,
       email: user.email,
       expires_at: expiresAt,
@@ -180,36 +223,92 @@ class UserService {
   static async getAll(
     params: PaginationParams,
   ): Promise<PaginationResult<User>> {
-    const query = knex("users")
-      .join("roles", "users.role_id", "roles.id")
-      .select(["users.*", "roles.name AS role_name", "roles.id AS role_id"]);
+    const search = params.filter?.search || "%";
 
-    const { search = "", ...theRestFilter } = params.filter || {};
-    const cleanParams = {
-      ...params,
-      filter: theRestFilter,
-    };
+    return paginate<User>(params, {
+      table: users,
+      where: (users) =>
+        or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`)),
+      with: {
+        role: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: (users) =>
+        Object.keys(params.sort || {}).map((key) => {
+          const direction = params.sort![key] === "desc" ? "desc" : "asc";
 
-    if (search) {
-      query.where(function () {
-        this.where("users.name", "ILIKE", `%${search}%`).orWhere(
-          "users.email",
-          "ILIKE",
-          `%${search}%`,
-        );
-      });
-    }
+          if (key === "role_name") {
+            if (direction === "desc") {
+              return desc(roles.name);
+            }
+            if (direction === "asc") {
+              return asc(roles.name);
+            }
+          }
 
-    const paginatedData = await paginate<User>(query, cleanParams, "users.id");
+          if (direction === "desc") {
+            return desc(users[key as keyof User]);
+          }
 
-    return paginatedData;
+          if (direction === "asc") {
+            return asc(users[key as keyof User]);
+          }
+        }),
+    });
+    // const page = params.page || 1;
+    // const limit = params.limit || 15;
+    // const offset = (page - 1) * limit;
+    // const search = params.filter?.search || "%";
+
+    // // Count total users matching the filter
+    // const total = await db
+    //   .select({ count: count(), name: users.name, email: users.email })
+    //   .from(users)
+    //   .groupBy(users.id)
+    //   .where((users) =>
+    //     or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`)),
+    //   )
+    //   .then((result) => Number(result[0]?.count) || 0);
+
+    // // Fetch paginated users
+    // const data = await db.query.users.findMany({
+    //   where: (users) =>
+    //     or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`)),
+    //   with: {
+    //     role: true,
+    //   },
+    //   orderBy: (users) => users.name,
+    //   limit,
+    //   offset,
+    // });
+
+    // const last_page = Math.ceil(total / limit);
+
+    // return {
+    //   data,
+    //   total,
+    //   current_page: page,
+    //   last_page,
+    //   limit,
+    // };
   }
 
   static async updateUser(
     id: number,
     updateData: Partial<User>,
   ): Promise<User> {
-    await knex("users").where({ id }).update(updateData);
+    await db
+      .update(users)
+      .set({
+        name: updateData.name,
+        email: updateData.email,
+        is_active: updateData.is_active,
+      })
+      .where(eq(users.id, id));
     return this.getById(id) as Promise<User>;
   }
 
@@ -248,8 +347,6 @@ class UserService {
       .join("");
   }
 
-  // ...existing code...
-
   private static hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
   }
@@ -258,24 +355,38 @@ class UserService {
     roleId: number | null,
     userId: number,
   ): Promise<string[]> {
-    const rolebasedPermissions = await knex("role_permissions")
-      .join("permissions", "role_permissions.permission_id", "permissions.id")
-      .where({ role_id: roleId })
-      .select(["permissions.name", "permissions.id"]);
+    const rolebasedPermissions = await db.query.rolePermissions.findMany({
+      where: (tables) => (roleId ? eq(tables.role_id, roleId) : undefined),
+      with: {
+        permission: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
-    const specificPermissions = await knex("user_permissions")
-      .join("permissions", "user_permissions.permission_id", "permissions.id")
-      .where({ user_id: userId })
-      .select(["permissions.name", "permissions.id"]);
+    const specificPermissions = await db.query.userPermissions.findMany({
+      where: (user_permissions) => eq(user_permissions.user_id, userId),
+      with: {
+        permission: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
     const uniquePermissions = new Map();
 
     rolebasedPermissions.forEach((permission) => {
-      uniquePermissions.set(permission.id, permission.name);
+      uniquePermissions.set(permission.id, permission.permission.name);
     });
 
     specificPermissions.forEach((permission) => {
-      uniquePermissions.set(permission.id, permission.name);
+      uniquePermissions.set(permission.id, permission.permission.name);
     });
 
     return Array.from(uniquePermissions.values());
@@ -285,9 +396,9 @@ class UserService {
     userId: number,
     permissionId: number,
   ): Promise<void> {
-    const permission = await knex("permissions")
-      .where({ id: permissionId })
-      .first();
+    const permission = await db.query.permissions.findFirst({
+      where: (permissions) => eq(permissions.id, permissionId),
+    });
 
     if (!permission) {
       throw new HttpError(
@@ -296,7 +407,7 @@ class UserService {
       );
     }
 
-    await knex("user_permissions").insert({
+    await db.insert(userPermissions).values({
       user_id: userId,
       permission_id: permission.id,
     });
@@ -306,9 +417,9 @@ class UserService {
     userId: number,
     permissionId: number,
   ): Promise<void> {
-    const permission = await knex("permissions")
-      .where({ id: permissionId })
-      .first();
+    const permission = await db.query.permissions.findFirst({
+      where: (permissions) => eq(permissions.id, permissionId),
+    });
 
     if (!permission) {
       throw new HttpError(
@@ -317,12 +428,14 @@ class UserService {
       );
     }
 
-    await knex("user_permissions")
-      .where({
-        user_id: userId,
-        permission_id: permission.id,
-      })
-      .delete();
+    await db
+      .delete(userPermissions)
+      .where(
+        and(
+          eq(userPermissions.user_id, userId),
+          eq(userPermissions.permission_id, permission.id),
+        ),
+      );
   }
 }
 
