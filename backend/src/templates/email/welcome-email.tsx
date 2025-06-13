@@ -63,7 +63,7 @@ export const WelcomeEmail = ({
           <Text style={credentialsText}>
             <strong>Email:</strong>
             <span style={credentialsValue}>{email}</span>
-          </Text> 
+          </Text>
           <Text style={credentialsText}>
             <strong>Password:</strong>
             <span style={credentialsValue}>{password}</span>
@@ -221,12 +221,10 @@ const credentialsText = {
 };
 
 const credentialsValue = {
-  backgroundColor: "#fef3c7",
   padding: "2px 6px",
   borderRadius: "4px",
   fontFamily: "monospace",
   fontSize: "13px",
-  color: "#92400e",
 };
 
 const featureTitle = {
