@@ -8,12 +8,12 @@ export async function seed(knex: Knex): Promise<void> {
 
   const permissionIds = await knex("permissions")
     .insert([
-      { name: "create_users", description: "Create new users" },
-      { name: "read_users", description: "View user data" },
-      { name: "update_users", description: "Update user data" },
-      { name: "delete_users", description: "Delete users" },
-      { name: "manage_roles", description: "Manage user roles" },
-      { name: "manage_permissions", description: "Manage permissions" },
+      { name: "action.create_users", description: "Create new users" },
+      { name: "action.read_users", description: "View user data" },
+      { name: "action.update_users", description: "Update user data" },
+      { name: "action.delete_users", description: "Delete users" },
+      { name: "action.manage_roles", description: "Manage user roles" },
+      { name: "action.manage_permissions", description: "Manage permissions" },
     ])
     .returning("id")
     .onConflict("name")
@@ -21,7 +21,12 @@ export async function seed(knex: Knex): Promise<void> {
 
   // Insert roles
   const roleIds = await knex("roles")
-    .insert([{ name: "admin" }, { name: "staff" }])
+    .insert([
+      { name: "admin", readable_name: "Administrator" },
+      { name: "staff", readable_name: "Staff" },
+      { name: "student", readable_name: "Siswa" },
+      { name: "teacher", readable_name: "Guru" },
+    ])
     .returning("id")
     .onConflict("name")
     .ignore();
