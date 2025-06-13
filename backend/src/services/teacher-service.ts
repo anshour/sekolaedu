@@ -15,6 +15,17 @@ class TeacherService {
 
     return data;
   }
+
+  static async createFromUser(userId: number): Promise<Teacher> {
+    const [newTeacher] = await db("teachers")
+      .insert({
+        user_id: userId,
+        type: "regular", // Default type, can be changed later
+      })
+      .returning("*");
+
+    return newTeacher;
+  }
 }
 
 export default TeacherService;

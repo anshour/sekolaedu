@@ -3,7 +3,7 @@ import db from "../database/connection";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 import { Student } from "~/models/student";
 import { attachBelongsTo } from "~/utils/attach-relation";
-import { removeObjectKeys, renameObjectKeys } from "~/utils/array-manipulation";
+import { removeObjectKeys } from "~/utils/array-manipulation";
 
 class StudentService {
   static async getAll(
@@ -37,6 +37,18 @@ class StudentService {
       ...data,
       data: studentsWithClassroom,
     };
+  }
+
+  static async createFromUser(userId: number): Promise<Student> {
+    const [newStudent] = await db("students")
+      .insert({
+        user_id: userId,
+        status: "active",
+        current_classroom_id: null,
+      })
+      .returning("*");
+
+    return newStudent;
   }
 }
 

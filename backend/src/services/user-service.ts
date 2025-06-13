@@ -8,6 +8,8 @@ import { PaginationParams, PaginationResult } from "~/types/pagination";
 import { paginate } from "~/utils/pagination";
 import emailService from "./email-service";
 import { removeObjectKeys } from "~/utils/array-manipulation";
+import StudentService from "./student-service";
+import TeacherService from "./teacher-service";
 
 class UserService {
   constructor() {}
@@ -15,12 +17,26 @@ class UserService {
   static async createUser(user: Partial<User>): Promise<User> {
     const hashedPassword = await this.hashPassword(user.password!);
 
+    if (!user.role_id) {
+      throw new HttpError("Role id is required", 400);
+    }
+
     const [insertedUser] = await knex("users")
       .insert({
         ...user,
         password: hashedPassword,
       })
       .returning("id");
+
+    const roleName = await this.getRoleNameById(user.role_id!);
+
+    if (roleName === "student") {
+      await StudentService.createFromUser(insertedUser.id);
+    }
+
+    if (roleName === "teacher") {
+      await TeacherService.createFromUser(insertedUser.id);
+    }
 
     return { id: insertedUser.id, ...user } as User;
   }
