@@ -1,6 +1,8 @@
 import { type Request, type Response } from "express";
+import { z } from "zod/v4";
 import AcademicYearService from "~/services/academic-year-service";
 import { HttpError } from "~/types/http-error";
+import validate from "~/utils/validate";
 
 const academicYearController = {
   async getAll(req: Request, res: Response) {
@@ -16,6 +18,18 @@ const academicYearController = {
     }
 
     res.status(200).json(activeAcademicYear);
+  },
+
+  async store(req: Request, res: Response) {
+    const schema = z.object({
+      name: z.string(),
+      start_date: z.iso.date(),
+      end_date: z.iso.date(),
+    });
+    const data = validate(schema, req.body);
+
+    const newAcademicYear = await AcademicYearService.create(data);
+    res.status(201).json(newAcademicYear);
   },
 };
 
