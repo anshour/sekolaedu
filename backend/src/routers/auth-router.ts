@@ -2,15 +2,13 @@ import { Router } from "express";
 import authController from "~/controllers/auth-controller";
 import authenticate from "~/middlewares/authenticate";
 
-const router = Router();
+const authRouter = Router();
 
-router.post("/login", authController.login);
-router.post("/register", authController.register);
-router.post("/forgot-password", authController.forgotPassword);
-router.post("/reset-password", authController.resetPassword);
-router.get("/me", authenticate, authController.getCurrentUser);
-router.put("/me", authenticate, authController.updateUser);
-
-const authRouter = router;
+authRouter.post("/login", authController.login);
+authRouter.post("/register", authController.register);
+authRouter.post("/forgot-password", authController.forgotPassword);
+authRouter.post("/reset-password", authController.resetPassword);
+authRouter.get("/me", authenticate, authController.getCurrentUser);
+authRouter.put("/me", authenticate, authController.updateUser);
 
 export default authRouter;

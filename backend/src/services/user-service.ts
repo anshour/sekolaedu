@@ -7,6 +7,7 @@ import { HttpError } from "../types/http-error";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 import { paginate } from "~/utils/pagination";
 import emailService from "./email-service";
+import { removeObjectKeys } from "~/utils/array-manipulation";
 
 class UserService {
   constructor() {}
@@ -182,13 +183,16 @@ class UserService {
   ): Promise<PaginationResult<User>> {
     const query = knex("users")
       .join("roles", "users.role_id", "roles.id")
-      .select(["users.*", "roles.name AS role_name", "roles.id AS role_id"]);
+      .select([
+        "users.id",
+        "users.name",
+        "users.email",
+        "users.is_active",
+        "roles.name AS role_name",
+        "roles.id AS role_id",
+      ]);
 
-    const { search = "", ...theRestFilter } = params.filter || {};
-    const cleanParams = {
-      ...params,
-      filter: theRestFilter,
-    };
+    const search = params.filter?.search || "";
 
     if (search) {
       query.where(function () {
@@ -199,6 +203,7 @@ class UserService {
         );
       });
     }
+    const cleanParams = removeObjectKeys(params, ["filter.search"]);
 
     const paginatedData = await paginate<User>(query, cleanParams, "users.id");
 

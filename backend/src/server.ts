@@ -11,7 +11,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
 import qs from "qs";
-
+import studentRouter from "./routers/student-router";
+import subjectRouter from "./routers/subject-router";
+import classroomRouter from "./routers/classroom-router";
+import teacherRouter from "./routers/teacher-router";
+import acYearRouter from "./routers/academic-year-router";
 
 const app = express();
 
@@ -42,6 +46,11 @@ app.use("/api/auth", authRouter);
 app.use("/api/permissions", permissionRouter);
 app.use("/api/roles", roleRouter);
 app.use("/api/users", userRouter);
+app.use("/api/classrooms", classroomRouter);
+app.use("/api/subjects", subjectRouter);
+app.use("/api/students", studentRouter);
+app.use("/api/teachers", teacherRouter);
+app.use("/api/academic-years", acYearRouter);
 
 app.get("/", (req, res) => {
   res.json({

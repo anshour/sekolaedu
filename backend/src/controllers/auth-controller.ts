@@ -39,7 +39,14 @@ const authController = {
       throw new HttpError("Email already taken", 400);
     }
 
-    const user = await UserService.createUser({ email, password, name });
+    const roleStaffId = 2; // Assuming 2 is the role ID for staff
+
+    const user = await UserService.createUser({
+      email,
+      password,
+      name,
+      role_id: roleStaffId,
+    });
 
     const token = await UserService.generateUserToken(user);
 
