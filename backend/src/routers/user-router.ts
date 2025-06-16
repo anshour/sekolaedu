@@ -2,17 +2,23 @@ import express from "express";
 import authenticate from "../middlewares/authenticate";
 import authorizePermission from "../middlewares/authorize-permission";
 import userController from "~/controllers/user-controller";
+import { Permission } from "~/constants/permissions";
 
 const userRouter = express.Router();
 
-// userRouter.use(authenticate, authorizePermission("manage_users"));
+userRouter.use(authenticate);
 
-// userRouter.post("/", userController.createUser);
-// userRouter.get("/:id", userController.getUser);
-// userRouter.put("/:id", userController.updateUser);
-// userRouter.delete("/:id", userController.deleteUser);
-userRouter.get("/", userController.getAllUsers);
+userRouter.post(
+  "/bulk",
+  authorizePermission(Permission.ManageUsers),
+  userController.bulkCreateUsers,
+);
+userRouter.get(
+  "/",
+  authorizePermission(Permission.ManageUsers),
+  userController.getAllUsers,
+);
 
-userRouter.post("/bulk", userController.bulkCreateUsers);
+userRouter.patch("/profile", userController.updateProfile);
 
 export default userRouter;

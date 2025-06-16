@@ -49,12 +49,16 @@ const userController = {
       if (result.status === "fulfilled") {
         return result.value;
       }
+
       return {
         ...users[index],
         password: null,
         id: null,
         is_success: false,
-        message: result.reason?.message || "Failed to create user",
+        message:
+          result.reason?.constraint === "users_email_unique"
+            ? "Email already exists"
+            : "Failed to create user",
       };
     });
 
@@ -78,6 +82,23 @@ const userController = {
 
     const users = await UserService.getAll(params);
     res.status(200).json(users);
+  },
+
+  async updateProfile(req: Request, res: Response) {
+    const schema = z.object({
+      // photo: z.string().optional(),
+      name: z.string().min(2),
+      email: z.email(),
+    });
+
+    const data = validate(schema, req.body);
+
+    const updatedUser = await UserService.updateUser(req.user!.id, data);
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   },
 };
 
