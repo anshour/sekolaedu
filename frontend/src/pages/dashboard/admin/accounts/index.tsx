@@ -15,6 +15,7 @@ import {
   Box,
   Button,
   Card,
+  Flex,
   Heading,
   IconButton,
   Table,
@@ -60,13 +61,15 @@ export default function Page() {
     <>
       <Card.Root mx="auto" w="full" maxW="breakpoint-lg">
         <Card.Body>
-          <Heading>Account List</Heading>
-          <br />
-          <Box textAlign="right" mb="2">
-            <Link href="/dashboard/admin/accounts/create">
-              <Button>+ Tambah</Button>
-            </Link>
-          </Box>
+          <Flex justifyContent="space-between" alignItems="center" mb="4">
+            <Card.Title>Account List</Card.Title>
+            <Box textAlign="right">
+              <Link href="/dashboard/admin/accounts/create">
+                <Button size="sm">+ Add</Button>
+              </Link>
+            </Box>
+          </Flex>
+
           <AccountListFilter onFilter={handleFilter} />
           <TableContainer>
             <Table.Root>

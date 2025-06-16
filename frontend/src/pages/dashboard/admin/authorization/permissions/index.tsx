@@ -7,65 +7,77 @@ import {
   tableSequence,
 } from "@/components/ui/table";
 import useUser from "@/context/use-user";
-import { useFetchRoles } from "@/hooks/use-fetch-authorizations";
+import { useFetchPermissions } from "@/hooks/use-fetch-authorizations";
 import useSmartRouter from "@/hooks/use-smart-router";
-import { Card, Heading, IconButton, Table } from "@chakra-ui/react";
-import { CircleArrowRight } from "lucide-react";
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  IconButton,
+  Table,
+} from "@chakra-ui/react";
+import { CircleArrowRight, Trash } from "lucide-react";
 
 export default function Page() {
   const user = useUser((state) => state.user);
   const router = useSmartRouter();
   const page = parseInt(router.page || "1") || 1;
 
-  const { roles, isEmpty, isFetching } = useFetchRoles();
+  const { permissions, isEmpty, isFetching } = useFetchPermissions();
 
   return (
     <>
-      <Card.Root>
-        <Card.Body w="breakpoint-md" mx="auto">
-          <Heading>Authorization Setting</Heading>
+      <Card.Root mx="auto" w="full" maxW="breakpoint-md">
+        <Card.Body>
+          <Flex justifyContent="space-between" alignItems="center">
+            <Card.Title>Permission Setting</Card.Title>
+            <Box textAlign="right">
+              <Button size="sm">+ Add</Button>
+            </Box>
+          </Flex>
           <br />
           <TableContainer>
             <Table.Root>
               <Table.Header>
                 <Table.Row>
                   <TableColumnHeader label="No" textAlign="center" w="60px" />
-                  <TableColumnHeader label="Nama" name="name" />
-                  <TableColumnHeader textAlign="center" >
-                    Opsi
-                  </TableColumnHeader>
+                  <TableColumnHeader label="Name" name="name" />
+                  <TableColumnHeader label="Description" name="name" />
+                  <TableColumnHeader textAlign="center">Opsi</TableColumnHeader>
                 </Table.Row>
               </Table.Header>
-              <TableBody isEmpty={isEmpty} isFetching={isFetching} cols={3}>
+              <TableBody isEmpty={isEmpty} isFetching={isFetching} cols={4}>
                 <TableRowData
-                  data={roles?.data}
+                  data={permissions?.data}
                   columns={[
                     {
                       accessor: "id",
                       key: "no",
                       textAlign: "center",
                       children: (_, index) =>
-                        tableSequence(index, page, roles?.limit),
+                        tableSequence(index, page, permissions?.limit),
                     },
                     {
-                      accessor: "readable_name",
-                      key: "readable_name",
+                      accessor: "name",
+                      key: "name",
+                    },
+                    {
+                      accessor: "description",
+                      key: "description",
                     },
                     {
                       accessor: "id",
                       key: "option",
                       textAlign: "center",
-                      children: (item) => (
+                      children: () => (
                         <IconButton
                           variant="ghost"
+                          colorPalette="red"
                           size="md"
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/admin/authorization/roles/${item.id}`
-                            )
-                          }
                         >
-                          <CircleArrowRight />
+                          <Trash />
                         </IconButton>
                       ),
                     },

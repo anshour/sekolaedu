@@ -20,7 +20,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Page() {
-  const router = useRouter();
   const { roles } = useFetchRoles();
   const [open, setOpen] = useState(false);
   const [createdUsers, setCreatedUsers] = useState<any[]>([]);
@@ -38,9 +37,13 @@ export default function Page() {
 
   return (
     <Card.Root mx="auto" w="full" maxW="breakpoint-lg">
-      <AccountCreatedDialog open={open} onOpenChange={setOpen} users={createdUsers} />
+      <AccountCreatedDialog
+        open={open}
+        onOpenChange={setOpen}
+        users={createdUsers}
+      />
       <Card.Body>
-        <Heading>Create New Account</Heading>
+        <Card.Title>Create New Account</Card.Title>
         <br />
         <FormProvider
           defaultValues={{

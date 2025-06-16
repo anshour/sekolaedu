@@ -26,13 +26,11 @@ export default function Page() {
   const roleId = router.query.id as string;
   const { role, isFetching, isEmpty } = useFetchRoleById(roleId);
 
-  console.log("role", role);
-
   return (
     <>
-      <Card.Root>
-        <Card.Body w="breakpoint-md" mx="auto">
-          <Heading>Role Setting</Heading>
+      <Card.Root mx="auto" w="full" maxW="breakpoint-md">
+        <Card.Body>
+          <Card.Title>Role Setting</Card.Title>
           <br />
           <BorderedBox mb="3">
             <SimpleGrid columns={{ base: 1, sm: 2 }} gap="2">
@@ -82,7 +80,7 @@ export default function Page() {
                       accessor: "id",
                       key: "option",
                       textAlign: "center",
-                      children: (item) => (
+                      children: () => (
                         <IconButton
                           variant="ghost"
                           colorPalette="red"
@@ -97,10 +95,7 @@ export default function Page() {
                 <Table.Row>
                   <Table.Cell colSpan={4}>
                     <Box textAlign="center">
-                      <Button
-                        size="sm"
-                        variant="subtle"
-                      >
+                      <Button size="sm" variant="subtle">
                         + Tambah
                       </Button>
                     </Box>
