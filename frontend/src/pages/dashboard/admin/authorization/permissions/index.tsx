@@ -48,7 +48,7 @@ export default function Page() {
                   <TableColumnHeader textAlign="center">Opsi</TableColumnHeader>
                 </Table.Row>
               </Table.Header>
-              <TableBody isEmpty={!isEmpty} isFetching={!isFetching} cols={4}>
+              <TableBody isEmpty={isEmpty} isFetching={isFetching} cols={4}>
                 <TableRowData
                   data={permissions?.data}
                   columns={[
