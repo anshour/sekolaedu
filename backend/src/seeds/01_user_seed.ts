@@ -2,8 +2,6 @@ import { Knex } from "knex";
 import bcrypt from "bcryptjs";
 
 export async function seed(knex: Knex): Promise<void> {
-  // await knex("users").del();
-
   const hashedPassword = await bcrypt.hash("password", 10);
 
   await knex("users").insert([
@@ -14,12 +12,9 @@ export async function seed(knex: Knex): Promise<void> {
       password: hashedPassword,
       is_active: true,
     },
-    {
-      id: 2,
-      name: "Regular User",
-      email: "user@example.com",
-      password: hashedPassword,
-      is_active: true,
-    },
   ]);
+
+  await knex.raw(
+    `SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users))`,
+  );
 }
