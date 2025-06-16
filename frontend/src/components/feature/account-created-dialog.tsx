@@ -42,15 +42,9 @@ const AccountCreatedDialog: React.FC<Props> = ({
               <Table.Root>
                 <Table.Header>
                   <Table.Row>
-                    <Table.ColumnHeader textAlign="center">
-                      Name
-                    </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
-                      Email
-                    </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
-                      Status
-                    </Table.ColumnHeader>
+                    <Table.ColumnHeader>Name</Table.ColumnHeader>
+                    <Table.ColumnHeader>Email</Table.ColumnHeader>
+                    <Table.ColumnHeader>Status</Table.ColumnHeader>
                     <Table.ColumnHeader>Message</Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
@@ -59,7 +53,7 @@ const AccountCreatedDialog: React.FC<Props> = ({
                     <Table.Row key={user.id}>
                       <Table.Cell>{user.name}</Table.Cell>
                       <Table.Cell>{user.email}</Table.Cell>
-                      <Table.Cell textAlign={"center"}>
+                      <Table.Cell>
                         {user.is_success ? (
                           <Text fontWeight="medium" color="green.600">
                             Success
