@@ -45,7 +45,7 @@ export default function Page() {
                   <InputField
                     control={control}
                     name="email"
-                    placeholder="johndoe@example.con"
+                    placeholder="johndoe@example.com"
                     label="Email"
                     type="email"
                     rules={{ required: "Harus diisi" }}
