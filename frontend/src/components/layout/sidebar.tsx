@@ -326,7 +326,8 @@ const Sidebar = ({
                     {user?.name}
                   </Text>
                   <Text fontSize="xs" color="gray.300">
-                    Your jabatan
+                    {/* TODO: MAP ROLE NAME */}
+                    {user?.role_name}
                   </Text>
                 </Box>
                 <EllipsisVertical size="18" color="white" />
@@ -336,11 +337,21 @@ const Sidebar = ({
           <MenuContent>
             <MenuItem
               as={Link}
+              // @ts-expect-error
               href="/dashboard/admin/profile"
               width="200px"
               value="profile"
             >
               Profile
+            </MenuItem>
+            <MenuItem
+              as={Link}
+              // @ts-expect-error
+              href="/dashboard/admin/switch-account"
+              width="200px"
+              value="switch-account"
+            >
+              Switch Account
             </MenuItem>
             <MenuItem
               width="200px"
