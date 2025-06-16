@@ -2,10 +2,14 @@ import express from "express";
 import authenticate from "../middlewares/authenticate";
 import authorizePermission from "../middlewares/authorize-permission";
 import permissionController from "~/controllers/permission-controller";
+import { Permission } from "~/constants/permissions";
 
 const permissionRouter = express.Router();
 
-permissionRouter.use(authenticate, authorizePermission("manage_permissions"));
+permissionRouter.use(
+  authenticate,
+  authorizePermission(Permission.ManagePermissions),
+);
 
 permissionRouter.post("/", permissionController.createPermission);
 permissionRouter.get("/:id", permissionController.getPermission);
