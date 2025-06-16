@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import { z } from "zod/v4";
 import PermissionService from "~/services/permission-service";
 import { HttpError } from "~/types/http-error";
+import { paginationSchema } from "~/types/pagination";
 import validate from "~/utils/validate";
 
 const permissionController = {
@@ -52,7 +53,9 @@ const permissionController = {
   },
 
   async getAllPermissions(req: Request, res: Response) {
-    const permissions = await PermissionService.getAll();
+    const params = validate(paginationSchema, req.query);
+
+    const permissions = await PermissionService.getAll(params);
     res.status(200).json(permissions);
   },
 

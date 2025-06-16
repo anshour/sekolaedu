@@ -1,4 +1,7 @@
+import { PaginationParams, PaginationResult } from "~/types/pagination";
 import db from "../database/connection";
+import { Permission } from "~/constants/permissions";
+import { paginate } from "~/utils/pagination";
 
 class PermissionService {
   static async create(data: any) {
@@ -19,8 +22,16 @@ class PermissionService {
     await db("permissions").where({ id }).delete();
   }
 
-  static async getAll() {
-    return await db("permissions").select("*");
+  static async getAll(
+    params: PaginationParams,
+  ): Promise<PaginationResult<Permission>> {
+
+    
+    const query = db("permissions").select("*");
+
+    const data = await paginate<Permission>(query, params);
+
+    return data;
   }
 
   static async isNameTaken(name: string): Promise<boolean> {
