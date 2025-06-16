@@ -152,6 +152,8 @@ const Sidebar = ({
 
   const handleClickLogout = () => {
     useUser.setState({ user: null });
+    //TODO: Clear token from localStorage or cookies
+    // TODO: Hit logout API endpoint
     router.push("/auth/login");
   };
 
@@ -338,7 +340,7 @@ const Sidebar = ({
             <MenuItem
               as={Link}
               // @ts-expect-error
-              href="/dashboard/admin/profile"
+              href={`/dashboard/${user?.role_name}/profile`}
               width="200px"
               value="profile"
             >
@@ -347,7 +349,7 @@ const Sidebar = ({
             <MenuItem
               as={Link}
               // @ts-expect-error
-              href="/dashboard/admin/switch-account"
+              href={`/dashboard/${user?.role_name}/switch-account`}
               width="200px"
               value="switch-account"
             >
@@ -385,6 +387,8 @@ interface BaseMenuType {
 
 export interface MenuItem extends BaseMenuType {
   type: "single" | "multiple";
+  // TODO: Handle exact matching
+  exact?: boolean;
   icon: LucideIcon;
   nestedMenus?: BaseMenuType[];
 }

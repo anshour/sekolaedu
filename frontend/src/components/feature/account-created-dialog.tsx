@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Table, Text } from "@chakra-ui/react";
+import { Box, Dialog, Table, Text } from "@chakra-ui/react";
 import React from "react";
 import { TableContainer } from "../ui/table";
 
