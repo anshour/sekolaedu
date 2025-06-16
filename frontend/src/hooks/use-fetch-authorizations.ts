@@ -22,6 +22,25 @@ export const useFetchRoles = () => {
   return { roles, isEmpty, ...query };
 };
 
+export const useFetchPermissions = () => {
+  const query = useQuery({
+    queryKey: ["permissions"],
+    queryFn: () => http.get("/permissions"),
+    placeholderData: keepPreviousData,
+  });
+
+  const permissions: PaginationResult<any> = useMemo(
+    () => query.data?.data || emptyPaginationResult,
+    [query.data]
+  );
+
+  const isEmpty = useMemo(() => {
+    return (permissions?.data?.length || 0) === 0;
+  }, [permissions.data.length]);
+
+  return { permissions, isEmpty, ...query };
+};
+
 export const useFetchRoleById = (roleId: string) => {
   const query = useQuery({
     queryKey: ["role-detail", roleId],
