@@ -35,10 +35,22 @@ const menus: MenuItem[] = [
   },
   {
     name: "Authorization",
-    type: "single",
+    type: "multiple",
     path: "/dashboard/admin/authorization",
     permission: "",
     icon: ShieldCheck,
+    nestedMenus: [
+      {
+        name: "Roles",
+        path: "/dashboard/admin/authorization/roles",
+        permission: "",
+      },
+      {
+        name: "Permissions",
+        path: "/dashboard/admin/authorization/permissions",
+        permission: "",
+      },
+    ],
   },
   {
     name: "Logs",
