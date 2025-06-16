@@ -113,7 +113,11 @@ export const TableBody = ({
   return (
     <Table.Body {...props}>
       <TableRowProgress isFetching={isFetching} cols={props.cols} />
-      <TableRowEmpty isEmpty={isEmpty} cols={props.cols} />
+      <TableRowEmpty
+        isEmpty={isEmpty}
+        isFetching={isFetching}
+        cols={props.cols}
+      />
       <TableRowSkeleton
         isEmpty={isEmpty}
         isFetching={isFetching}
@@ -202,11 +206,14 @@ const TableRowProgress = ({
 const TableRowEmpty = ({
   cols = 1,
   isEmpty,
+  isFetching,
 }: {
   cols: number;
   isEmpty: boolean;
+  isFetching: boolean;
 }) => {
   if (!isEmpty) return null;
+  if (isFetching) return null;
   return (
     <Table.Row p="0">
       <Table.Cell colSpan={cols}>
@@ -234,21 +241,21 @@ const TableRowSkeleton = ({
       <>
         <Table.Row>
           {columns.map((i) => (
-            <Table.Cell colSpan={cols} key={i + "a"}>
+            <Table.Cell key={i + "a"}>
               <Skeleton h="20px" w="full" />
             </Table.Cell>
           ))}
         </Table.Row>
         <Table.Row>
           {columns.map((i) => (
-            <Table.Cell colSpan={cols} key={i + "b"}>
+            <Table.Cell key={i + "b"}>
               <Skeleton h="20px" w="full" />
             </Table.Cell>
           ))}
         </Table.Row>
         <Table.Row>
           {columns.map((i) => (
-            <Table.Cell colSpan={cols} key={i + "c"}>
+            <Table.Cell key={i + "c"}>
               <Skeleton h="20px" w="full" />
             </Table.Cell>
           ))}
