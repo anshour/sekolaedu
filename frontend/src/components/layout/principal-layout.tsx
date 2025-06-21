@@ -42,6 +42,10 @@ const PrincipalLayout = ({ children }: { children: ReactNode }) => {
       const currentUrl = router.asPath;
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
+
+    if (user?.role_name !== "principal") {
+      router.replace("/403");
+    }
   }, [user]);
 
   useEffect(() => {

@@ -7,32 +7,26 @@ import {
   Container,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { ShieldX, Home, ArrowLeft } from "lucide-react";
 import { useColorModeValue } from "@/components/ui/color-mode";
 
 export default function Page() {
   const router = useRouter();
-  const previousPath = router.query.previous_path as string;
-  const message = router.query.message as string;
 
   const bgGradient = useColorModeValue(
-    "linear(to-br, red.50, orange.50, yellow.50)",
-    "linear(to-br, red.900, orange.900, yellow.900)"
+    "linear(to-br, red.50, pink.50, purple.50)",
+    "linear(to-br, red.900, pink.900, purple.900)"
   );
 
   const cardBg = useColorModeValue("white", "gray.800");
   const iconColor = useColorModeValue("red.500", "red.300");
 
   const handleGoHome = () => {
-    router.push("/");
+    router.push("/home");
   };
 
-  const handleRefresh = () => {
-    if (previousPath) {
-      router.push(previousPath);
-    } else {
-      router.reload();
-    }
+  const handleGoBack = () => {
+    router.back();
   };
 
   return (
@@ -62,16 +56,24 @@ export default function Page() {
             bg={useColorModeValue("red.100", "red.900")}
             animation="pulse 2s infinite"
           >
-            <AlertTriangle size={40} style={{ color: iconColor }} />
+            <ShieldX size={40} style={{ color: iconColor }} />
           </Box>
 
           <VStack gap={{ base: 2, md: 3 }}>
             <Heading
-              size={{ base: "lg", md: "xl" }}
+              size={{ base: "xl", md: "2xl" }}
               color={useColorModeValue("gray.800", "white")}
               fontWeight="bold"
             >
-              Oops! Something went wrong
+              403
+            </Heading>
+
+            <Heading
+              size={{ base: "lg", md: "xl" }}
+              color={useColorModeValue("gray.800", "white")}
+              fontWeight="semibold"
+            >
+              Access Forbidden
             </Heading>
 
             <Text
@@ -81,8 +83,8 @@ export default function Page() {
               lineHeight="tall"
               px={{ base: 2, sm: 0 }}
             >
-              {message ||
-                "We encountered an unexpected error. Don't worry, it's not your fault!"}
+              You don&apos;t have permission to access this resource. Please
+              contact your administrator if you believe this is an error.
             </Text>
           </VStack>
 
@@ -99,19 +101,17 @@ export default function Page() {
               <Home size={20} /> Go to Homepage
             </Button>
 
-            {!!previousPath && (
-              <Button
-                variant="outline"
-                size={{ base: "md", md: "lg" }}
-                onClick={handleRefresh}
-                w="full"
-                borderRadius={{ base: "lg", md: "xl" }}
-                fontSize={{ base: "sm", md: "md" }}
-                h={{ base: "12", md: "14" }}
-              >
-                <RefreshCw size={20} /> Try Again
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size={{ base: "md", md: "lg" }}
+              onClick={handleGoBack}
+              w="full"
+              borderRadius={{ base: "lg", md: "xl" }}
+              fontSize={{ base: "sm", md: "md" }}
+              h={{ base: "12", md: "14" }}
+            >
+              <ArrowLeft size={20} /> Go Back
+            </Button>
           </VStack>
         </VStack>
       </Container>

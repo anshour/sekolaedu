@@ -48,6 +48,10 @@ const TeacherLayout = ({ children }: { children: ReactNode }) => {
       const currentUrl = router.asPath;
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
+
+    if (user?.role_name !== "teacher") {
+      router.replace("/403");
+    }
   }, [user]);
 
   useEffect(() => {
