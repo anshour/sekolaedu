@@ -1,5 +1,6 @@
 import { isHeicFile } from "@/utils/is-heic";
-import { Box, Image } from "@chakra-ui/react";
+import { Box, Image, Icon } from "@chakra-ui/react";
+import { Camera } from "lucide-react";
 import React, { useRef, useState } from "react";
 import {
   FieldValues,
@@ -78,17 +79,59 @@ const AvatarInputField = <TFieldValues extends FieldValues>({
       />
 
       {previewUrl ? (
-        <Image
-          src={previewUrl}
+        <Box
+          position="relative"
           w="20"
           h="20"
-          objectPosition="center"
-          objectFit="cover"
-          alt="user avatar"
           rounded="full"
           flexShrink={0}
           onClick={() => inputRef.current?.click()}
-        />
+          cursor="pointer"
+          _hover={{
+            _before: {
+              opacity: 1,
+            },
+            "& > .camera-icon": {
+              opacity: 1,
+            },
+          }}
+          _before={{
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "blackAlpha.600",
+            borderRadius: "full",
+            opacity: 0,
+            transition: "opacity 0.2s ease",
+            zIndex: 1,
+          }}
+        >
+          <Image
+            src={previewUrl}
+            w="20"
+            h="20"
+            objectPosition="center"
+            objectFit="cover"
+            alt="user avatar"
+            rounded="full"
+          />
+          <Icon
+            as={Camera}
+            className="camera-icon"
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)"
+            color="white"
+            boxSize="6"
+            opacity={0}
+            transition="opacity 0.2s ease"
+            zIndex={2}
+          />
+        </Box>
       ) : (
         <Box
           w="20"
@@ -98,7 +141,29 @@ const AvatarInputField = <TFieldValues extends FieldValues>({
           bgColor="gray.200"
           onClick={() => inputRef.current?.click()}
           cursor="pointer"
-        />
+          position="relative"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          _hover={{
+            bgColor: "gray.300",
+            "& > .camera-icon": {
+              opacity: 1,
+            },
+          }}
+        >
+          <Icon
+            as={Camera}
+            className="camera-icon"
+            color="gray.500"
+            boxSize="6"
+            opacity={0.5}
+            transition="opacity 0.2s ease"
+            _hover={{
+              opacity: 1,
+            }}
+          />
+        </Box>
       )}
     </>
   );
