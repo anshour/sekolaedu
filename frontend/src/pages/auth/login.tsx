@@ -18,6 +18,7 @@ export default function Page() {
   useEffect(() => {
     if (isAuthenticated) {
       if (redirectUrl) {
+        // TODO: VALIDATE REDIRECT URL, ROLE MUST BE ALLOWED TO ACCESS
         router.push(redirectUrl);
       } else {
         router.push("/home");
