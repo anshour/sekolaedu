@@ -9,13 +9,11 @@ import {
   Box,
   Button,
   Card,
-  Heading,
   IconButton,
   Input,
   Table,
 } from "@chakra-ui/react";
 import { SaveIcon, TrashIcon } from "lucide-react";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
