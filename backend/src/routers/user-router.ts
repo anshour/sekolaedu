@@ -3,7 +3,9 @@ import authenticate from "../middlewares/authenticate";
 import authorizePermission from "../middlewares/authorize-permission";
 import userController from "~/controllers/user-controller";
 import { Permission } from "~/constants/permissions";
+import multer from "multer";
 
+const upload = multer({ dest: "tmp/uploads/" });
 const userRouter = express.Router();
 
 userRouter.use(authenticate);
@@ -19,6 +21,10 @@ userRouter.get(
   userController.getAllUsers,
 );
 
-userRouter.patch("/profile", userController.updateProfile);
+userRouter.patch(
+  "/profile",
+  upload.single("photo_url"),
+  userController.updateProfile,
+);
 
 export default userRouter;

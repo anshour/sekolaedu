@@ -43,7 +43,7 @@ class UserService {
 
   static async getById(id: number): Promise<User | null> {
     const user = await knex("users")
-      .select("id", "name", "email", "role_id")
+      .select("id", "name", "email", "role_id", "photo_url")
       .where({ id })
       .first();
 
@@ -230,6 +230,7 @@ class UserService {
     id: number,
     updateData: Partial<User>,
   ): Promise<User> {
+    console.log(updateData);
     await knex("users").where({ id }).update(updateData);
     return this.getById(id) as Promise<User>;
   }

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import config from "~/config";
 import UserService from "~/services/user-service";
 import { HttpError } from "~/types/http-error";
+import logger from "~/utils/logger";
 
 async function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -26,7 +27,9 @@ async function authenticate(req: Request, res: Response, next: NextFunction) {
     Object.assign(req, { user: { ...user, permissions } });
 
     next();
-  } catch (error) {
+  } catch (error: any) {
+    logger.error({ message: error.message, stack: error.stack });
+
     throw new HttpError("Invalid or expired token", 401);
   }
 }

@@ -4,6 +4,8 @@ import { createPaginationSchema } from "~/types/pagination";
 import UserService from "~/services/user-service";
 import { z } from "zod/v4";
 import emailService from "~/services/email-service";
+import { Multer } from "multer";
+import cloudStorageService from "~/services/cloud-storage-service";
 
 const userController = {
   async bulkCreateUsers(req: Request, res: Response) {
@@ -86,14 +88,28 @@ const userController = {
 
   async updateProfile(req: Request, res: Response) {
     const schema = z.object({
-      // photo: z.string().optional(),
       name: z.string().min(2),
       email: z.email(),
     });
 
+    const photo = req.file as Express.Multer.File | undefined;
+    let photoUrl: string | undefined;
+
+    if (photo !== undefined) {
+      // Save photo to cloud storage
+      const fileKey = await cloudStorageService.upload(
+        photo.path,
+        photo.originalname,
+      );
+      photoUrl = cloudStorageService.getPublicUrl(fileKey);
+    }
+
     const data = validate(schema, req.body);
 
-    const updatedUser = await UserService.updateUser(req.user!.id, data);
+    const updatedUser = await UserService.updateUser(req.user!.id, {
+      ...data,
+      photo_url: photoUrl,
+    });
 
     res.status(200).json({
       message: "Profile updated successfully",
