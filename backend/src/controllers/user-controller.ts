@@ -88,6 +88,15 @@ const userController = {
     res.status(200).json(users);
   },
 
+  async getUserById(req: Request, res: Response) {
+    const user = await UserService.getById(Number(req.params.id));
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+    res.status(200).json(user);
+  },
+
   async updateProfile(req: Request, res: Response) {
     const schema = z.object({
       name: z.string().min(2),

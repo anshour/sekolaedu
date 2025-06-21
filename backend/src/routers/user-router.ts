@@ -15,10 +15,17 @@ userRouter.post(
   authorizePermission(Permission.ManageUsers),
   userController.bulkCreateUsers,
 );
+
 userRouter.get(
   "/",
   authorizePermission(Permission.ManageUsers),
   userController.getAllUsers,
+);
+
+userRouter.get(
+  "/:id",
+  authorizePermission(Permission.ManageUsers),
+  userController.getUserById,
 );
 
 userRouter.patch(
