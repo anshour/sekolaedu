@@ -4,8 +4,10 @@ import { createPaginationSchema } from "~/types/pagination";
 import UserService from "~/services/user-service";
 import { z } from "zod/v4";
 import emailService from "~/services/email-service";
-import { Multer } from "multer";
 import cloudStorageService from "~/services/cloud-storage-service";
+import fs from "fs";
+import logger from "~/utils/logger";
+import resizeImage from "~/utils/resize-image";
 
 const userController = {
   async bulkCreateUsers(req: Request, res: Response) {
@@ -96,12 +98,29 @@ const userController = {
     let photoUrl: string | undefined;
 
     if (photo !== undefined) {
+      // TODO : Validate photo type and size
+
+      const resizedPath = photo.path + "_resized";
+      await resizeImage(photo.path, resizedPath, 700);
+
       // Save photo to cloud storage
       const fileKey = await cloudStorageService.upload(
-        photo.path,
+        resizedPath,
         photo.originalname,
       );
       photoUrl = cloudStorageService.getPublicUrl(fileKey);
+
+      fs.unlink(photo.path, (err) => {
+        if (err) {
+          logger.error("Failed to delete local file:", err);
+        }
+      });
+
+      fs.unlink(resizedPath, (err) => {
+        if (err) {
+          logger.error("Failed to delete local resized file:", err);
+        }
+      });
     }
 
     const data = validate(schema, req.body);
