@@ -1,5 +1,6 @@
 import AccountListFilter from "@/components/feature/account-list-filter";
 import AdminLayout from "@/components/layout/admin-layout";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { StandardPagination } from "@/components/ui/pagination";
 import {
   TableBody,
@@ -58,8 +59,16 @@ export default function Page() {
     router.updateQuery(data);
   };
   return (
-    <>
-      <Card.Root mx="auto" w="full" maxW="breakpoint-lg">
+    <Box mx="auto" w="full" maxW="breakpoint-lg">
+      <Box mb="3">
+        <Breadcrumb
+          items={[
+            { title: "Dashboard", url: "/" },
+            { title: "Accounts", url: "/dashboard/admin/accounts" },
+          ]}
+        />
+      </Box>
+      <Card.Root>
         <Card.Body>
           <Flex justifyContent="space-between" alignItems="center" mb="4">
             <Card.Title>Account List</Card.Title>
@@ -165,7 +174,7 @@ export default function Page() {
           <StandardPagination mt="3" {...users} />
         </Card.Body>
       </Card.Root>
-    </>
+    </Box>
   );
 }
 
