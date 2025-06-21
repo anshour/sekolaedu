@@ -1,5 +1,6 @@
 import http, { HttpError } from "@/utils/http";
 import { handleMutationError } from "@/utils/new-error-handler";
+import { objectToFormData } from "@/utils/var-transform";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect } from "react";
@@ -14,6 +15,7 @@ import toast from "react-hot-toast";
 export interface FormProviderProps {
   defaultValues: Record<string, any>;
   transform?: (data: Record<string, any>) => Record<string, any>;
+  transformToFormData?: boolean;
   onSuccess?: (res: any) => void;
   onError?: (res: any) => void;
   successMessage?: string;
@@ -37,6 +39,7 @@ export interface FormProviderProps {
 export const FormProvider = ({
   defaultValues,
   transform,
+  transformToFormData = false,
   onSuccess,
   onError,
   successMessage,
@@ -99,7 +102,12 @@ export const FormProvider = ({
 
   const onSubmit = form.handleSubmit((data) => {
     const formData = transform ? transform(data) : data;
-    mutation.mutate(formData);
+    if (transformToFormData) {
+      const formDataObj = objectToFormData(formData);
+      mutation.mutate(formDataObj);
+    } else {
+      mutation.mutate(formData);
+    }
   });
 
   useEffect(() => {

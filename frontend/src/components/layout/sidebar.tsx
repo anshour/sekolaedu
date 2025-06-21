@@ -6,6 +6,7 @@ import {
   useDisclosure,
   Flex,
   Collapsible,
+  Image,
 } from "@chakra-ui/react";
 import { ChevronDown, EllipsisVertical, LucideIcon } from "lucide-react";
 import { useRouter } from "next/router";
@@ -315,13 +316,26 @@ const Sidebar = ({
                 bgColor: "gray.800",
               }}
             >
-              <Box
-                w="7"
-                h="7"
-                rounded="full"
-                bgColor="gray.500"
-                flexShrink={0}
-              />
+              {!!user?.photo_url ? (
+                <Image
+                  src={user?.photo_url}
+                  w="7"
+                  h="7"
+                  objectPosition="center"
+                  objectFit="cover"
+                  alt="user avatar"
+                  rounded="full"
+                  flexShrink={0}
+                />
+              ) : (
+                <Box
+                  w="7"
+                  h="7"
+                  rounded="full"
+                  bgColor="gray.500"
+                  flexShrink={0}
+                />
+              )}
               <Flex justifyContent="space-between" w="full" alignItems="center">
                 <Box>
                   <Text fontWeight="semibold" fontSize="sm" color="white">

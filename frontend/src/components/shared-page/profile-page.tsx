@@ -2,11 +2,12 @@ import useUser from "@/context/use-user";
 import { Box, Button, Card, Flex } from "@chakra-ui/react";
 import FormProvider from "../ui/form/form-provider";
 import { InputField } from "../ui/form/input-field";
+import AvatarInputField from "../ui/form/avatar-input-field";
 
 export default function ProfilePage() {
   const user = useUser((state) => state.user);
 
-  const handleSuccess = (res: any) => {
+  const handleSuccess = () => {
     useUser.getState().refetchUser();
   };
   return (
@@ -18,10 +19,11 @@ export default function ProfilePage() {
           <Box>
             <FormProvider
               defaultValues={{
-                photo: "",
+                photo_url: (user?.photo_url || "") as File | string,
                 name: user?.name || "",
                 email: user?.email || "",
               }}
+              transformToFormData
               method="patch"
               api="/users/profile"
               successMessage="Profile updated successfully"
@@ -30,12 +32,10 @@ export default function ProfilePage() {
               {({ isLoading, control }) => (
                 <>
                   <Flex alignItems="center" gap="4" py="4">
-                    <Box
-                      w="16"
-                      h="16"
-                      rounded="full"
-                      bgColor="gray.200"
-                      flexShrink={0}
+                    <AvatarInputField
+                      control={control}
+                      name="photo_url"
+                      initialUrl={user?.photo_url || ""}
                     />
                     <InputField
                       control={control}

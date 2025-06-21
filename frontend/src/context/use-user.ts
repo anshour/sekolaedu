@@ -9,7 +9,7 @@ interface UserStore {
     role_id: number;
     role_name: string;
     email: string;
-    photo: string;
+    photo_url: string;
     permissions?: string[];
   };
   refetchUser: () => Promise<void>;
