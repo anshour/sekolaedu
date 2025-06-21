@@ -21,9 +21,6 @@ export default function Page() {
 
   const { user, isFetching } = useFetchUserById(userId);
 
-  console.log("User Data:", user);
-  //   const user = useUser((state) => state.user);
-
   return (
     <Box mx="auto" w="full" maxW="breakpoint-lg">
       <Box mb="3">
@@ -31,7 +28,7 @@ export default function Page() {
           items={[
             { title: "Dashboard", url: "/" },
             { title: "Accounts", url: "/dashboard/admin/accounts" },
-            { title: "Account Detail" },
+            { title: "Detail" },
           ]}
         />
       </Box>
