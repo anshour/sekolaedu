@@ -19,6 +19,8 @@ import acYearRouter from "./routers/academic-year-router";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.set("query parser", (str: string) => {
   return qs.parse(str, {
     // qs options
