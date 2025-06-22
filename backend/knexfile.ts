@@ -18,13 +18,6 @@ const knexConfig: Knex.Config = {
   seeds: {
     directory: "./src/seeds",
   },
-  pool: {
-    afterCreate: (conn: any, done: any) => {
-      conn.query(`SET search_path TO ${config.dbSchema}`, (err: any) => {
-        done(err, conn);
-      });
-    },
-  },
 };
 
 export default knexConfig;

@@ -27,7 +27,6 @@ const config = {
   dbPassword: process.env.DB_PASSWORD,
   dbName: process.env.DB_NAME,
   dbSsl: process.env.DB_SSL === "true",
-  dbSchema: process.env.DB_SCHEMA ?? "public",
 
   emailFrom: process.env.EMAIL_FROM,
   emailFromName: process.env.EMAIL_FROM_NAME,
