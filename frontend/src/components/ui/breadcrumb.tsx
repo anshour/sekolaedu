@@ -3,6 +3,7 @@ import {
   Show,
   type SystemStyleObject,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import * as React from "react";
 
 export interface BreadcrumbProps extends ChakraBreadcrumb.RootProps {
@@ -24,7 +25,7 @@ export const Breadcrumb = React.forwardRef<HTMLDivElement, BreadcrumbProps>(
               <React.Fragment key={index}>
                 {!last && (
                   <ChakraBreadcrumb.Item>
-                    <ChakraBreadcrumb.Link href={item.url}>
+                    <ChakraBreadcrumb.Link as={Link} href={item.url}>
                       {item.title}
                     </ChakraBreadcrumb.Link>
                   </ChakraBreadcrumb.Item>
