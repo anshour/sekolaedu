@@ -1,8 +1,8 @@
 import config from "./src/config";
-
+import { Knex } from "knex";
 require("tsx");
 
-const knexConfig = {
+const knexConfig: Knex.Config = {
   client: "pg",
   connection: {
     host: config.dbHost,
@@ -18,7 +18,13 @@ const knexConfig = {
   seeds: {
     directory: "./src/seeds",
   },
-  searchPath: [config.dbSchema],
+  pool: {
+    afterCreate: (conn: any, done: any) => {
+      conn.query(`SET search_path TO ${config.dbSchema}`, (err: any) => {
+        done(err, conn);
+      });
+    },
+  },
 };
 
 export default knexConfig;
