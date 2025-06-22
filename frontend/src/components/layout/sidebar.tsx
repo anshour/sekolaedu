@@ -27,12 +27,12 @@ const SingleMenuItem = ({ menu }: { menu: MenuItemState }) => {
         cursor="pointer"
         gap="3"
         transition="0.2s linear"
-        borderLeft={menu.selected ? "solid 3px" : "none"}
+        // borderLeft={menu.selected ? "solid 3px" : "none"}
         borderColor="green.500"
-        bgColor={menu.selected ? "#1e282c" : ""}
+        bgColor={menu.selected ? "black" : ""}
         color="gray.300"
         _hover={{
-          bgColor: "#1e282c",
+          bgColor: "black",
           color: "white",
         }}
       >
@@ -70,7 +70,7 @@ const MultipleMenuItem = ({ menu }: { menu: MenuItemState }) => {
         onClick={onToggle}
         color="gray.300"
         _hover={{
-          bgColor: "#1e282c",
+          bgColor: "black",
           color: "white",
         }}
       >
@@ -105,11 +105,11 @@ const MultipleMenuItem = ({ menu }: { menu: MenuItemState }) => {
                 cursor="pointer"
                 transition="0.2s linear"
                 color="gray.300"
-                bgColor={nestedMenu.selected ? "#1e282c" : ""}
-                borderLeft={nestedMenu.selected ? "solid 3px" : "none"}
+                bgColor={nestedMenu.selected ? "black" : ""}
+                // borderLeft={nestedMenu.selected ? "solid 3px" : "none"}
                 borderColor="green.500"
                 _hover={{
-                  bgColor: "#1e282c",
+                  bgColor: "black",
                   color: "white",
                 }}
               >
@@ -289,14 +289,13 @@ const Sidebar = ({
           pt={3}
           pb={3}
           px="4"
-          bgColor="#008d4c"
           justifyContent="center"
           alignItems="center"
           gap="2"
         >
           <Flex alignItems="center" gap="2">
             <Text fontWeight="medium" fontSize="lg" color="white">
-              App
+              App Name
             </Text>
           </Flex>
         </Flex>
