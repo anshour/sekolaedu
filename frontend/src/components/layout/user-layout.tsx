@@ -10,6 +10,7 @@ import { ReactNode, useEffect } from "react";
 import Topbar from "./topbar";
 import useUser from "@/context/use-user";
 import { useRouter } from "next/router";
+import useAcademicYear from "@/context/use-academic-year";
 
 const sidebarWidth = 240;
 const menus: MenuItem[] = [
@@ -61,6 +62,10 @@ const UserLayout = ({ children }: { children: ReactNode }) => {
       router.push("/auth/login");
     }
   }, [user]);
+
+  useEffect(() => {
+    useAcademicYear.getState().refetchAcademicYear();
+  }, []);
 
   return (
     <Box css={{ "--sidebar-width": `${sidebarWidth}px` }}>

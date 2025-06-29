@@ -153,6 +153,7 @@ const Sidebar = ({
 
   const handleClickLogout = () => {
     useUser.setState({ user: null });
+    //! BUG : THE PAGE IS REDIRECTED TO 403 PAGE INSTEAD OF LOGIN PAGE
     //TODO: Clear token from localStorage or cookies
     // TODO: Hit logout API endpoint
     router.push("/auth/login");

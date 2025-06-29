@@ -10,6 +10,7 @@ import { ReactNode, useEffect } from "react";
 import Topbar from "./topbar";
 import useUser from "@/context/use-user";
 import { useRouter } from "next/router";
+import useAcademicYear from "@/context/use-academic-year";
 
 const sidebarWidth = 240;
 const menus: MenuItem[] = [
@@ -50,6 +51,10 @@ const PrincipalLayout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     useUser.getState().refetchUser();
+  }, []);
+
+  useEffect(() => {
+    useAcademicYear.getState().refetchAcademicYear();
   }, []);
 
   if (!user) {

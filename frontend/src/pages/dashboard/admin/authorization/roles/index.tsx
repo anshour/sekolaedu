@@ -7,8 +7,8 @@ import {
   tableSequence,
 } from "@/components/ui/table";
 import useUser from "@/context/use-user";
-import { useFetchRoles } from "@/hooks/use-fetch-authorizations";
-import useSmartRouter from "@/hooks/use-smart-router";
+import { useFetchRoles } from "@/query/use-fetch-authorizations";
+import useSmartRouter from "@/query/use-smart-router";
 import { Card, Heading, IconButton, Table } from "@chakra-ui/react";
 import { CircleArrowRight } from "lucide-react";
 

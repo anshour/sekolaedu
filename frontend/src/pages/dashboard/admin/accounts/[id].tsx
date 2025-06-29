@@ -2,7 +2,10 @@ import AdminLayout from "@/components/layout/admin-layout";
 import BorderedBox from "@/components/ui/bordered-box";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import DataProperty from "@/components/ui/data-property";
-import { useFetchUserById } from "@/hooks/use-fetch-users";
+import useUser from "@/context/use-user";
+import { useFetchUserById } from "@/query/use-fetch-users";
+import http, { HttpError } from "@/utils/http";
+import { handleMutationError } from "@/utils/new-error-handler";
 // import useUser from "@/context/use-user";
 import {
   Badge,
@@ -13,13 +16,32 @@ import {
   Image,
   SimpleGrid,
 } from "@chakra-ui/react";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
 
 export default function Page() {
   const router = useRouter();
   const userId = router.query.id as string;
 
   const { user, isFetching } = useFetchUserById(userId);
+
+  const loginMutation = useMutation({
+    mutationFn: () => http.post(`/users/${userId}/token`),
+    onSuccess: async (res) => {
+      toast.success("Token received successfully, please wait...");
+      localStorage.setItem("token", res.data.token);
+      await useUser.getState().refetchUser();
+      router.push("/home");
+    },
+    onError: (err) => {
+      handleMutationError(err as HttpError);
+    },
+  });
+
+  const handleClickLogin = () => {
+    loginMutation.mutate();
+  };
 
   return (
     <Box mx="auto" w="full" maxW="breakpoint-lg">
@@ -95,14 +117,31 @@ export default function Page() {
                   isLoading={isFetching}
                   label="Opsi"
                   element={
-                    <Flex gap="2">
-                      <Button size="2xs" variant="outline">
-                        Ubah
+                    <Box gap="2">
+                      <Button m="1" size="2xs" variant="outline">
+                        Reset Password
                       </Button>
-                      <Button size="2xs" variant="outline" colorPalette="red">
+                      <Button
+                        m="1"
+                        size="2xs"
+                        variant="outline"
+                        onClick={handleClickLogin}
+                        loading={loginMutation.isPending}
+                      >
+                        Login
+                      </Button>
+                      <Button m="1" size="2xs" variant="outline">
+                        Update
+                      </Button>
+                      <Button
+                        m="1"
+                        size="2xs"
+                        variant="outline"
+                        colorPalette="red"
+                      >
                         Hapus
                       </Button>
-                    </Flex>
+                    </Box>
                   }
                 />
               </SimpleGrid>

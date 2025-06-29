@@ -6,6 +6,7 @@ import {
   UseControllerProps,
 } from "react-hook-form";
 import ReactAsyncSelect, { AsyncProps } from "react-select/async";
+import { Box } from "@chakra-ui/react";
 
 interface Props<TFieldValues extends FieldValues>
   extends Pick<
@@ -32,8 +33,8 @@ export const AsyncSelectField = <TFieldValues extends FieldValues>({
   label,
   loadOptions,
   otherFilter = [],
-  optionLabel = "name",
-  optionValue = "id",
+  optionLabel = "label",
+  optionValue = "value",
   ...props
 }: Props<TFieldValues>) => {
   const {
@@ -55,15 +56,19 @@ export const AsyncSelectField = <TFieldValues extends FieldValues>({
       helperText={helperText}
       label={label}
     >
-      <ReactAsyncSelect
-        getOptionLabel={(option) => option[optionLabel]}
-        getOptionValue={(option) => option[optionValue]}
-        isClearable
-        loadOptions={(v) => loadOptions(v, ...otherFilter)}
-        value={field.value}
-        onChange={field.onChange}
-        {...props}
-      />
+      <Box w="full">
+        {/* TODO: MAKE IT LOOK LIKE CHAKRA UI SELECT*/}
+        <ReactAsyncSelect
+          getOptionLabel={(option) => option[optionLabel]}
+          getOptionValue={(option) => option[optionValue]}
+          isClearable
+          defaultOptions
+          loadOptions={(v) => loadOptions(v, ...otherFilter)}
+          value={field.value}
+          onChange={field.onChange}
+          {...props}
+        />
+      </Box>
     </Field>
   );
 };

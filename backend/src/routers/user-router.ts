@@ -22,6 +22,12 @@ userRouter.get(
   userController.getAllUsers,
 );
 
+userRouter.post(
+  "/:id/token",
+  authorizePermission(Permission.ManageUsers),
+  userController.generateUserToken,
+);
+
 userRouter.get(
   "/:id",
   authorizePermission(Permission.ManageUsers),

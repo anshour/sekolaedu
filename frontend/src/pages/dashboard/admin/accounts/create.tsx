@@ -3,16 +3,9 @@ import AdminLayout from "@/components/layout/admin-layout";
 import FormProvider from "@/components/ui/form/form-provider";
 import { SelectField } from "@/components/ui/form/select-field";
 import { TableContainer } from "@/components/ui/table";
-import { useFetchRoles } from "@/hooks/use-fetch-authorizations";
+import { useFetchRoles } from "@/query/use-fetch-authorizations";
 import { handlePasteNewLine } from "@/utils/handle-paste-newline";
-import {
-  Box,
-  Button,
-  Card,
-  IconButton,
-  Input,
-  Table,
-} from "@chakra-ui/react";
+import { Box, Button, Card, IconButton, Input, Table } from "@chakra-ui/react";
 import { SaveIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";

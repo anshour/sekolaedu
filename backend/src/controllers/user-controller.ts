@@ -8,6 +8,7 @@ import cloudStorageService from "~/services/cloud-storage-service";
 import fs from "fs";
 import logger from "~/utils/logger";
 import resizeImage from "~/utils/resize-image";
+import { HttpError } from "~/types/http-error";
 
 const userController = {
   async bulkCreateUsers(req: Request, res: Response) {
@@ -88,6 +89,20 @@ const userController = {
     res.status(200).json(users);
   },
 
+  async generateUserToken(req: Request, res: Response) {
+    const userId = Number(req.params.id);
+    const user = await UserService.getById(userId);
+    if (!user) {
+      throw new HttpError("User not found", 404);
+    }
+
+    const token = await UserService.generateUserToken(user);
+
+    res.status(200).json({
+      message: "Token generated successfully",
+      token,
+    });
+  },
   async getUserById(req: Request, res: Response) {
     const user = await UserService.getById(Number(req.params.id));
     if (!user) {

@@ -6,22 +6,12 @@ import {
   TableRowData,
   tableSequence,
 } from "@/components/ui/table";
-import useUser from "@/context/use-user";
-import { useFetchPermissions } from "@/hooks/use-fetch-authorizations";
-import useSmartRouter from "@/hooks/use-smart-router";
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  Heading,
-  IconButton,
-  Table,
-} from "@chakra-ui/react";
-import { CircleArrowRight, Trash } from "lucide-react";
+import { useFetchPermissions } from "@/query/use-fetch-authorizations";
+import useSmartRouter from "@/query/use-smart-router";
+import { Box, Button, Card, Flex, IconButton, Table } from "@chakra-ui/react";
+import { Trash } from "lucide-react";
 
 export default function Page() {
-  const user = useUser((state) => state.user);
   const router = useSmartRouter();
   const page = parseInt(router.page || "1") || 1;
 

@@ -8,8 +8,8 @@ import {
   TableRowData,
   tableSequence,
 } from "@/components/ui/table";
-import { useFetchRoleById } from "@/hooks/use-fetch-authorizations";
-import useSmartRouter from "@/hooks/use-smart-router";
+import { useFetchRoleById } from "@/query/use-fetch-authorizations";
+import useSmartRouter from "@/query/use-smart-router";
 import {
   Box,
   Button,

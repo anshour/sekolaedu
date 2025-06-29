@@ -14,7 +14,6 @@ class StudentService {
       .select("students.*", "users.name as user_name");
 
     const userName = params.filter?.user_name || "";
-
     if (userName) {
       query.where(function () {
         this.where("users.name", "ILIKE", `%${userName}%`);

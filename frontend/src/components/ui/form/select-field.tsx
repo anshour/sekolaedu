@@ -75,7 +75,7 @@ export const SelectField = ({
             </Select.Control>
             <Portal>
               <Select.Positioner>
-                <Select.Content>
+                <Select.Content zIndex="max">
                   {options.items.map((role) => (
                     <Select.Item key={role.value} item={role}>
                       {role.label}

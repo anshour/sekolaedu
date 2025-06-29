@@ -4,9 +4,11 @@ import { Field } from "@/components/ui/field";
 import useUser from "@/context/use-user";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { DASHBOARD_ROUTES } from "@/constants/roles";
 
 export default function Page() {
   const isAuthenticated = useUser((state) => state.isAuthenticated());
+  const user = useUser((state) => state.user);
   const router = useRouter();
   const redirectUrl = (router.query.redirect as string) || "/home";
 
@@ -15,16 +17,34 @@ export default function Page() {
     useUser.setState({ user: res.data.user });
   };
 
+  const validateRedirectUrl = (url: string, userRole: string): boolean => {
+    // Allow home page for all users
+    if (url === "/home") return true;
+
+    // Check if the redirect URL matches the user's role pattern
+    const dashboardRoute = DASHBOARD_ROUTES[userRole];
+    if (!dashboardRoute) return false;
+
+    // Check if the URL starts with the role's allowed pattern
+    return url.startsWith(dashboardRoute);
+  };
+
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       if (redirectUrl) {
-        // TODO: VALIDATE REDIRECT URL, ROLE MUST BE ALLOWED TO ACCESS
-        router.push(redirectUrl);
+        // Validate if user role is allowed to access the redirect URL
+        if (validateRedirectUrl(redirectUrl, user.role_name)) {
+          router.push(redirectUrl);
+        } else {
+          // If not allowed, redirect to user's default dashboard
+          router.push("/home");
+        }
       } else {
+        // No specific redirect, go to role-based dashboard
         router.push("/home");
       }
     }
-  }, [isAuthenticated, router, redirectUrl]);
+  }, [isAuthenticated, user, router, redirectUrl]);
 
   return (
     <>
@@ -60,6 +80,7 @@ export default function Page() {
                           })}
                         />
                       </Field>
+                      {/* TODO: ADD ICON TO SHOW AND HIDE PASSWORD */}
                       <Field
                         label="Password"
                         invalid={!!formErrors.password}

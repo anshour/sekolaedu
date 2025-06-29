@@ -1,4 +1,4 @@
-import useSmartRouter from "@/hooks/use-smart-router";
+import useSmartRouter from "@/query/use-smart-router";
 import { PaginationResult } from "@/types/pagination";
 import {
   ButtonGroup,

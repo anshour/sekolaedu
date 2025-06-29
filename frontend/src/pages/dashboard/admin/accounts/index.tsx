@@ -9,8 +9,8 @@ import {
   TableRowData,
   tableSequence,
 } from "@/components/ui/table";
-import { useFetchUser } from "@/hooks/use-fetch-users";
-import useSmartRouter from "@/hooks/use-smart-router";
+import { useFetchUser } from "@/query/use-fetch-users";
+import useSmartRouter from "@/query/use-smart-router";
 import {
   Badge,
   Box,

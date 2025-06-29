@@ -4,6 +4,7 @@ import {
   Settings,
   ShieldCheck,
   User,
+  GraduationCap,
 } from "lucide-react";
 import Sidebar, { MenuItem } from "./sidebar";
 import {
@@ -16,6 +17,7 @@ import { ReactNode, useEffect } from "react";
 import Topbar from "./topbar";
 import useUser from "@/context/use-user";
 import { useRouter } from "next/router";
+import useAcademicYear from "@/context/use-academic-year";
 
 const sidebarWidth = 240;
 const menus: MenuItem[] = [
@@ -32,6 +34,13 @@ const menus: MenuItem[] = [
     path: "/dashboard/admin/accounts",
     permission: "",
     icon: User,
+  },
+  {
+    name: "Classrooms",
+    type: "single",
+    path: "/dashboard/admin/classrooms",
+    permission: "",
+    icon: GraduationCap,
   },
   {
     name: "Authorization",
@@ -96,6 +105,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     useUser.getState().refetchUser();
+  }, []);
+
+  useEffect(() => {
+    useAcademicYear.getState().refetchAcademicYear();
   }, []);
 
   if (!user) {

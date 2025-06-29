@@ -1,10 +1,4 @@
-import {
-  Home as HomeIcon,
-  Logs,
-  Settings,
-  ShieldCheck,
-  User,
-} from "lucide-react";
+import { Home as HomeIcon, BookOpen as BookOpenIcon } from "lucide-react";
 import Sidebar, { MenuItem } from "./sidebar";
 import {
   Box,
@@ -16,6 +10,7 @@ import { ReactNode, useEffect } from "react";
 import Topbar from "./topbar";
 import useUser from "@/context/use-user";
 import { useRouter } from "next/router";
+import useAcademicYear from "@/context/use-academic-year";
 
 const sidebarWidth = 240;
 const menus: MenuItem[] = [
@@ -25,6 +20,25 @@ const menus: MenuItem[] = [
     path: "/dashboard/teacher",
     permission: "",
     icon: HomeIcon,
+  },
+  {
+    name: "Pelajaran",
+    type: "multiple",
+    path: "/dashboard/teacher/subjects",
+    permission: "",
+    icon: BookOpenIcon,
+    nestedMenus: [
+      {
+        name: "Daftar Pelajaran",
+        path: "/dashboard/teacher/subjects",
+        permission: "",
+      },
+      {
+        name: "Tambah Pelajaran",
+        path: "/dashboard/teacher/subjects/create",
+        permission: "",
+      },
+    ],
   },
 ];
 
@@ -56,6 +70,10 @@ const TeacherLayout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     useUser.getState().refetchUser();
+  }, []);
+
+  useEffect(() => {
+    useAcademicYear.getState().refetchAcademicYear();
   }, []);
 
   if (!user) {

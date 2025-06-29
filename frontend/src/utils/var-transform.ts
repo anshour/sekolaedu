@@ -68,7 +68,7 @@ export const decamelizeKey = (o: any): any => {
 };
 
 export const removeNull = (o: FlexibleObject) => {
-  let obj = JSON.parse(JSON.stringify(o));
+  const obj = JSON.parse(JSON.stringify(o));
   const cleanObject = (object: FlexibleObject) => {
     Object.keys(object).forEach((key) => {
       if (null === object[key]) object[key] = "";
@@ -140,7 +140,7 @@ export const htmlToText = (text: string | null, length = 0) => {
 };
 
 export interface OptionsParam {
-  value: string;
+  value: string | number;
   label: string;
 }
 
