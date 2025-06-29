@@ -12,8 +12,8 @@
     "migrate:status": "knex migrate:status",
     "migrate:rollback": "knex migrate:rollback",
     "migrate:rollback-all": "knex migrate:rollback --all",
+    "seed": "knex seed:run",
     "seed:make": "knex seed:make",
-    "seed:run": "knex seed:run",
     "email:dev": "email dev --dir src/templates/email",
     "format": "prettier --write \"src/**/*.{ts,js,json}\" --ignore-unknown",
     "tsc": "tsc"
