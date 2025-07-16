@@ -115,6 +115,15 @@ const authController = {
     const updatedUser = await UserService.updateUser(userId, updateData);
     res.json({ user: updatedUser });
   },
+
+  async logout(req: Request, res: Response) {
+    const token = req.token!;
+    const userId = req.user!.id;
+
+    await UserService.blacklistToken(token, userId);
+
+    res.json({ message: "Logged out successfully" });
+  },
 };
 
 export default authController;

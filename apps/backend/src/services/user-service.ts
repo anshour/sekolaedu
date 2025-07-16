@@ -269,8 +269,6 @@ class UserService {
       .join("");
   }
 
-  // ...existing code...
-
   private static hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
   }
@@ -343,6 +341,37 @@ class UserService {
         user_id: userId,
         permission_id: permission.id,
       })
+      .delete();
+  }
+
+  static async blacklistToken(token: string, userId: number): Promise<void> {
+    try {
+      // Decode token to get expiration
+      const decoded = jwt.verify(token, config.jwtSecretKey) as { exp: number };
+      const expiresAt = new Date(decoded.exp * 1000);
+
+      await knex("token_blacklist").insert({
+        token,
+        user_id: userId,
+        expires_at: expiresAt,
+      });
+    } catch (error) {
+      throw new HttpError("Invalid token", 400);
+    }
+  }
+
+  static async isTokenBlacklisted(token: string): Promise<boolean> {
+    const blacklistedToken = await knex("token_blacklist")
+      .where({ token })
+      .andWhere("expires_at", ">", new Date())
+      .first();
+
+    return !!blacklistedToken;
+  }
+
+  static async cleanupExpiredTokens(): Promise<void> {
+    await knex("token_blacklist")
+      .where("expires_at", "<=", new Date())
       .delete();
   }
 }

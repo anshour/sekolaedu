@@ -13,6 +13,11 @@ async function authenticate(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
+    const isBlacklisted = await UserService.isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      throw new HttpError("Token has been invalidated", 401);
+    }
+
     const decoded = jwt.verify(token, config.jwtSecretKey) as {
       user_id: number;
     };
@@ -24,7 +29,7 @@ async function authenticate(req: Request, res: Response, next: NextFunction) {
 
     const permissions = await UserService.getPermissions(user.role_id, user.id);
 
-    Object.assign(req, { user: { ...user, permissions } });
+    Object.assign(req, { user: { ...user, permissions }, token });
 
     next();
   } catch (error: any) {
