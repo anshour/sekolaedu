@@ -29,9 +29,8 @@ export default function Page() {
   const loginMutation = useMutation({
     mutationFn: () => http.post(`/users/${userId}/token`),
     onSuccess: async (res) => {
-      toast.success("Token received successfully, please wait...");
+      toast.success("Login successful, please wait...");
       localStorage.setItem("token", res.data.token);
-      await useUser.getState().refetchUser();
       router.push("/home");
     },
     onError: (err) => {

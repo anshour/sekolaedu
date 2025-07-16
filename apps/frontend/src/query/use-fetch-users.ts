@@ -1,7 +1,8 @@
 import { emptyPaginationResult, PaginationResult } from "@/types/pagination";
-import http from "@/utils/http";
+import http, { HttpError } from "@/utils/http";
+import { handleMutationError } from "@/utils/new-error-handler";
 import { objectToUrlParam } from "@/utils/var-transform";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export interface User {
@@ -46,4 +47,13 @@ export const useFetchUserById = (id: number | string) => {
   const user: User = useMemo(() => query.data?.data || null, [query.data]);
 
   return { user, ...query };
+};
+
+export const useLogoutUser = () => {
+  return useMutation({
+    mutationFn: () => http.post(`/auth/logout`),
+    onError: (err) => {
+      handleMutationError(err as HttpError);
+    },
+  });
 };

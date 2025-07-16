@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import useUser from "@/context/use-user";
 import Link from "next/link";
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu";
+import { useLogoutUser } from "@/query/use-fetch-users";
 
 const SingleMenuItem = ({ menu }: { menu: MenuItemState }) => {
   // TODO: HANDLE EXTERNAL LINKS
@@ -151,11 +152,11 @@ const Sidebar = ({
 
   const [menus, setMenus] = useState<MenuItemState[]>([]);
 
-  const handleClickLogout = () => {
-    useUser.setState({ user: null });
-    //! BUG : THE PAGE IS REDIRECTED TO 403 PAGE INSTEAD OF LOGIN PAGE
-    //TODO: Clear token from localStorage or cookies
-    // TODO: Hit logout API endpoint
+  const logoutMutation = useLogoutUser();
+
+  const handleClickLogout = async () => {
+    await logoutMutation.mutateAsync();
+    localStorage.removeItem("token");
     router.push("/auth/login");
   };
 
@@ -360,7 +361,7 @@ const Sidebar = ({
             >
               Profile
             </MenuItem>
-            <MenuItem
+            {/* <MenuItem
               as={Link}
               // @ts-expect-error
               href={`/dashboard/${user?.role_name}/switch-account`}
@@ -368,7 +369,7 @@ const Sidebar = ({
               value="switch-account"
             >
               Switch Account
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem
               width="200px"
               value="logout"

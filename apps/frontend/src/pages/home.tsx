@@ -1,11 +1,12 @@
 import useUser from "@/context/use-user";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { DASHBOARD_ROUTES } from "@/constants/roles";
 
 export default function Home() {
   const router = useRouter();
   const user = useUser((state) => state.user);
+  const [isRefetched, setIsRefetched] = useState(false);
 
   const redirectToDashboard = async () => {
     // await useUser.getState().refetchUser();
@@ -23,13 +24,25 @@ export default function Home() {
   };
 
   useEffect(() => {
+    useUser
+      .getState()
+      .refetchUser()
+      .then(() => {
+        setIsRefetched(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!isRefetched) return;
+
     if (!user) {
       router.push("/auth/login");
       return;
     }
-
+    
     redirectToDashboard();
-  }, [user]);
+
+  }, [user, isRefetched]);
 
   return <>Please wait...</>;
 }
