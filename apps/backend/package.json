@@ -50,7 +50,8 @@
     "react-email": "^4.0.15",
     "sharp": "^0.34.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.8"
+    "zod": "^3.25.8",
+    "@sekolaedu/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/compression": "^1.7.5",
