@@ -33,18 +33,14 @@ const Topbar = ({ isDesktop, isOpen, onToggle }: Props) => {
           <Flex alignItems="center" gap={2}>
             <IconButton
               colorScheme="primary"
-              variant="ghost"
+              variant="plain"
               color="white"
               fontSize="24px"
               aria-label="toggle menu"
               height="auto"
               minW={0}
-              // rounded="full"
               px="1"
               onClick={onToggle}
-              _hover={{ bg: "green.100", color: "green.500" }}
-              _expanded={{ bg: "green.100", color: "green.500" }}
-              _focus={{ bg: "green.100", color: "green.500" }}
             >
               <Menu />
             </IconButton>
