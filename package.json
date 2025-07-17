@@ -14,6 +14,12 @@
     "typescript": "5.8.3"
   },
   "packageManager": "pnpm@10.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "unrs-resolver"
+    ]
+  },
   "engines": {
     "node": ">=22"
   }
