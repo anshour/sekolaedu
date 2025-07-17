@@ -31,7 +31,13 @@ class ClassroomService {
   }
 
   static async getById(id: number): Promise<Classroom | null> {
-    const classroom = await db("classrooms").where({ id }).first();
+    const classroom = await db("classrooms")
+      .where("classrooms.id", id)
+      .leftJoin("teachers", "classrooms.guardian_teacher_id", "teachers.id")
+      .leftJoin("users", "teachers.user_id", "users.id")
+      .orderBy("classrooms.level")
+      .select("classrooms.*", "users.name as guardian_teacher_name")
+      .first();
 
     return classroom || null;
   }

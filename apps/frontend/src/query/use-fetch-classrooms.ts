@@ -18,3 +18,17 @@ export const useFetchClassrooms = () => {
 
   return { classrooms, isEmpty, ...query };
 };
+
+export const useFetchClassroomDetail = (id: number | string) => {
+  const query = useQuery({
+    queryKey: queryKeys.classroom.detail(id),
+    queryFn: () => http.get(`/classrooms/${id}`),
+    placeholderData: keepPreviousData,
+    enabled: !!id,
+  });
+
+  const classroom: any = query.data?.data?.classroom || {};
+  const students: any[] = query.data?.data?.students || [];
+
+  return { classroom, students, ...query };
+};
