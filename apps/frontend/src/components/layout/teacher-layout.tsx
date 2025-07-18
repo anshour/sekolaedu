@@ -1,5 +1,5 @@
 import { Home as HomeIcon, BookOpen as BookOpenIcon } from "lucide-react";
-import Sidebar, { MenuItem } from "./sidebar";
+import { Sidebar, MenuItemType } from "./sidebar";
 import {
   Box,
   useBreakpointValue,
@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 import useAcademicYear from "@/context/use-academic-year";
 
 const sidebarWidth = 240;
-const menus: MenuItem[] = [
+const menus: MenuItemType[] = [
   {
     name: "Home",
     type: "single",
@@ -52,7 +52,7 @@ const TeacherLayout = ({ children }: { children: ReactNode }) => {
     },
     {
       fallback: "base",
-    }
+    },
   ) as boolean;
 
   const menuDisclosure = useDisclosure();

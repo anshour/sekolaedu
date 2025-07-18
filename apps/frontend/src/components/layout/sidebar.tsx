@@ -19,7 +19,7 @@ export type {
   SidebarProps,
 } from "./sidebar/index";
 
-const Sidebar = ({
+export const Sidebar = ({
   isDesktop,
   isOpen,
   onOpen,
@@ -63,5 +63,3 @@ const Sidebar = ({
     </>
   );
 };
-
-export default Sidebar;
