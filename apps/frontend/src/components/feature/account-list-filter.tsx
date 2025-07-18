@@ -1,5 +1,4 @@
 import { Box, Button, Input } from "@chakra-ui/react";
-import React from "react";
 import { useForm } from "react-hook-form";
 
 interface Props {
