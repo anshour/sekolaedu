@@ -21,7 +21,7 @@ export const useFetchClassrooms = () => {
 
 export const useFetchClassroomDetail = (id: number | string) => {
   const query = useQuery({
-    queryKey: queryKeys.classroom.detail(id),
+    queryKey: queryKeys.classroom.detail(Number(id)),
     queryFn: () => http.get(`/classrooms/${id}`),
     placeholderData: keepPreviousData,
     enabled: !!id,
