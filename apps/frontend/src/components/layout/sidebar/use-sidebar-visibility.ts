@@ -20,5 +20,5 @@ export const useSidebarVisibility = ({
         onClose();
       }
     }
-  }, [isDesktop, isOpen, onOpen, onClose]);
+  }, [isDesktop]);
 };

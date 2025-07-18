@@ -26,11 +26,9 @@ export const Sidebar = ({
   onClose,
   menus: initialMenus,
 }: SidebarProps) => {
-  const user = useUser((state) => state.user);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const menus = useSidebarMenus(initialMenus);
 
-  // Handle sidebar visibility
   useSidebarVisibility({ isDesktop, isOpen, onOpen, onClose });
 
   return (
