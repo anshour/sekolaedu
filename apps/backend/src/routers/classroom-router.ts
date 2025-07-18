@@ -13,4 +13,6 @@ classroomRouter.put("/:id", classroomController.update);
 classroomRouter.get("/", classroomController.index);
 classroomRouter.get("/:id", classroomController.show);
 
+classroomRouter.post("/:id/students", classroomController.addStudent);
+
 export default classroomRouter;

@@ -67,6 +67,25 @@ const classroomController = {
 
     res.status(200).json({ classroom, students });
   },
+
+  async addStudent(req: Request, res: Response) {
+    const { id } = req.params;
+    const schema = z.object({
+      student_id: z.int(),
+    });
+
+    const data = validate(schema, req.body);
+    const classroomId = parseInt(id, 10);
+    const classroom = await ClassroomService.getById(classroomId);
+    if (!classroom) {
+      throw new HttpError("Classroom not found", 404);
+    }
+    await ClassroomService.addStudent(classroomId, data.student_id);
+
+    res.status(201).json({
+      message: "Student added to classroom successfully",
+    });
+  },
 };
 
 export default classroomController;

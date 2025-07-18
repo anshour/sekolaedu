@@ -51,6 +51,18 @@ class ClassroomService {
 
     return students;
   }
+
+  static async addStudent(
+    classroomId: number,
+    studentId: number,
+  ): Promise<void> {
+    await db("classroom_students").insert({
+      classroom_id: classroomId,
+      student_id: studentId,
+    });
+
+    // TODO: UPDATE CURRENT_CLASSROOM_ID IN STUDENTS TABLE IF NEEDED
+  }
 }
 
 export default ClassroomService;
