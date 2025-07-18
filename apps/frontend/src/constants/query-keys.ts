@@ -1,6 +1,10 @@
 export const queryKeys = {
   classroom: {
     list: ["classrooms"],
-    detail: (id: number | string) => ["classrooms", id],
+    detail: (id: number) => ["classrooms", id],
+  },
+
+  student: {
+    list: (filter: Record<string, any>) => ["students", filter],
   },
 };
