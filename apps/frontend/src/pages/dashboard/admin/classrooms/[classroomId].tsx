@@ -1,3 +1,6 @@
+import ClassroomAddDialog from "@/components/feature/classroom-add-dialog";
+import ClassroomAddStudentsDialog from "@/components/feature/classroom-add-students-dialog";
+import ClassroomEditDialog from "@/components/feature/classroom-edit-dialog";
 import AdminLayout from "@/components/layout/admin-layout";
 import BorderedBox from "@/components/ui/bordered-box";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -10,19 +13,38 @@ import {
 } from "@/components/ui/table";
 import useUser from "@/context/use-user";
 import { useFetchClassroomDetail } from "@/query/use-fetch-classrooms";
-import { Box, Card, SimpleGrid, Table } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Card,
+  SimpleGrid,
+  Table,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 export default function Page() {
   const user = useUser((state) => state.user);
   const router = useRouter();
   const classroomId = router.query.classroomId as string;
+  const editDisclosure = useDisclosure();
+  const addStudentDisclosure = useDisclosure();
 
   const { classroom, students, isFetching } =
     useFetchClassroomDetail(classroomId);
 
   return (
     <Box mx="auto" w="full" maxW="breakpoint-lg">
+      <ClassroomEditDialog
+        classroom={classroom}
+        open={editDisclosure.open}
+        onOpenChange={editDisclosure.setOpen}
+      />
+      <ClassroomAddStudentsDialog
+        open={addStudentDisclosure.open}
+        onOpenChange={addStudentDisclosure.setOpen}
+      />
       <Box mb="3">
         <Breadcrumb
           items={[
@@ -54,7 +76,30 @@ export default function Page() {
                 label="Wali Kelas"
                 value={classroom?.guardian_teacher_name}
               />
-              <DataProperty isLoading={isFetching} label="Opsi" value={""} />
+              <DataProperty
+                isLoading={isFetching}
+                label="Opsi"
+                element={
+                  <>
+                    <Button
+                      m="1"
+                      size="2xs"
+                      variant="outline"
+                      onClick={editDisclosure.onOpen}
+                    >
+                      Ubah
+                    </Button>
+                    <Button
+                      m="1"
+                      colorPalette="red"
+                      size="2xs"
+                      variant="outline"
+                    >
+                      Hapus
+                    </Button>
+                  </>
+                }
+              />
             </SimpleGrid>
           </BorderedBox>
           <TableContainer>
@@ -87,6 +132,19 @@ export default function Page() {
                     },
                   ]}
                 />
+                <Table.Row>
+                  <Table.Cell colSpan={4}>
+                    <Box textAlign="center">
+                      <Button
+                        size="sm"
+                        variant="subtle"
+                        onClick={addStudentDisclosure.onOpen}
+                      >
+                        + Tambah
+                      </Button>
+                    </Box>
+                  </Table.Cell>
+                </Table.Row>
               </TableBody>
             </Table.Root>
           </TableContainer>
