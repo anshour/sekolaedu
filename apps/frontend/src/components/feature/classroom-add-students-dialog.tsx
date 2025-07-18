@@ -2,11 +2,14 @@ import {
   Box,
   Button,
   Dialog,
+  Flex,
+  HStack,
   IconButton,
-  SimpleGrid,
+  Stack,
   Table,
+  Text,
 } from "@chakra-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   TableBody,
   TableColumnHeader,
@@ -16,20 +19,59 @@ import {
 import StudentListFilter from "./student-list-filter";
 import { useFetchStudents } from "@/query/use-fetch-students";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Check, CircleCheck, CircleMinus, CircleX, Plus } from "lucide-react";
+import http from "@/utils/http";
+import { queryKeys } from "@/constants/query-keys";
 
 interface Props {
+  classroomId: number;
+  classroomStudents: any[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const ClassroomAddDialog: React.FC<Props> = ({ open, onOpenChange }) => {
+const ClassroomAddDialog: React.FC<Props> = ({
+  open,
+  onOpenChange,
+  classroomId,
+  classroomStudents,
+}) => {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Record<string, any>>({});
+  const [selectedStudent, setSelectedStudent] = useState<Record<string, any>>(
+    {},
+  );
 
   const { students, isEmpty, isFetching } = useFetchStudents({
     filter,
   });
+
+  const mutation = useMutation({
+    mutationFn: (studentId: number) =>
+      http.post(`/classrooms/${classroomId}/students`, {
+        student_id: studentId,
+      }),
+    onSuccess: () => {},
+  });
+
+  const isAdding = (studentId: number) => {
+    return mutation.isPending && selectedStudent.id === studentId;
+  };
+
+  const isAlreadyAdded = (studentId: number) => {
+    return classroomStudents.some((student) => student.id === studentId);
+  };
+
+  const handleClickAdd = (student: any) => {
+    setSelectedStudent(student);
+    mutation.mutate(student.id, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.classroom.detail(classroomId),
+        });
+      },
+    });
+  };
 
   const handleFilter = (data: Record<string, any>) => {
     setFilter(data);
@@ -56,6 +98,10 @@ const ClassroomAddDialog: React.FC<Props> = ({ open, onOpenChange }) => {
                     <TableColumnHeader label="No" textAlign="center" w="60px" />
                     <TableColumnHeader label="Nama Siswa" />
                     <TableColumnHeader label="No. Induk Siswa" />
+                    <TableColumnHeader
+                      textAlign="center"
+                      label="Anggota Kelas"
+                    />
                     <TableColumnHeader textAlign="center" label="Opsi" />
                   </Table.Row>
                 </Table.Header>
@@ -79,12 +125,33 @@ const ClassroomAddDialog: React.FC<Props> = ({ open, onOpenChange }) => {
                       },
                       {
                         accessor: "id",
+                        key: "id",
+                        children: (student) => (
+                          <Flex justifyContent="center">
+                            {isAlreadyAdded(student.id) ? (
+                              <>
+                                <Text mr="2">Ya</Text>
+                                <CircleCheck size={20} color="green" />
+                              </>
+                            ) : (
+                              <>
+                                <Text mr="2">Tidak</Text>
+                                <CircleX size={20} color="gray" />
+                              </>
+                            )}
+                          </Flex>
+                        ),
+                      },
+                      {
+                        accessor: "id",
                         key: "option",
                         textAlign: "center",
-                        children: () => (
+                        children: (student) => (
                           <IconButton
                             variant="ghost"
-                            // colorPalette=""
+                            loading={isAdding(student.id)}
+                            disabled={isAlreadyAdded(student.id)}
+                            onClick={() => handleClickAdd(student)}
                             size="md"
                           >
                             <Plus />

@@ -28,6 +28,7 @@ export default function Page() {
   const user = useUser((state) => state.user);
   const router = useRouter();
   const classroomId = router.query.classroomId as string;
+
   const editDisclosure = useDisclosure();
   const addStudentDisclosure = useDisclosure();
 
@@ -42,6 +43,8 @@ export default function Page() {
         onOpenChange={editDisclosure.setOpen}
       />
       <ClassroomAddStudentsDialog
+        classroomStudents={students}
+        classroomId={Number(classroomId)}
         open={addStudentDisclosure.open}
         onOpenChange={addStudentDisclosure.setOpen}
       />
