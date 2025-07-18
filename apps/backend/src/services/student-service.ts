@@ -20,7 +20,20 @@ class StudentService {
       });
     }
 
-    const cleanParams = removeObjectKeys(params, ["filter.user_name"]);
+    let cleanParams = removeObjectKeys(params, ["filter.user_name"]);
+
+    const search = params.filter?.search || "";
+
+    if (search) {
+      query.where(function () {
+        this.where("users.name", "ILIKE", `%${search}%`).orWhere(
+          "students.identification_number",
+          "=",
+          search,
+        );
+      });
+    }
+    cleanParams = removeObjectKeys(params, ["filter.search"]);
 
     const data = await paginate<Student>(query, cleanParams, "students.id");
 

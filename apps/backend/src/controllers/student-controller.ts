@@ -6,7 +6,7 @@ import StudentService from "~/services/student-service";
 const studentController = {
   async getStudents(req: Request, res: Response) {
     const schema = createPaginationSchema({
-      allowedFilters: ["current_classroom_id", "user_name"],
+      allowedFilters: ["current_classroom_id", "user_name", "search"],
       allowedSorts: ["name"],
     });
 
