@@ -52,7 +52,7 @@ export default function Page() {
       [column]: direction,
     }));
     // Implement sorting logic here
-    console.log(`Sorting by ${column} in ${direction} order`);
+    console.warn(`Sorting by ${column} in ${direction} order`);
   };
 
   const handleFilter = (data: Record<string, any>) => {

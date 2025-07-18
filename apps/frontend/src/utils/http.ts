@@ -33,7 +33,7 @@ http.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 http.interceptors.response.use(
@@ -48,27 +48,27 @@ http.interceptors.response.use(
 
     if (error.response?.status === 500) {
       toast.error(
-        "Maaf ada kesalahan teknis, silahkan hubungi admin. Kode 500"
+        "Maaf ada kesalahan teknis, silahkan hubungi admin. Kode 500",
       );
       error.isHandled = true;
     }
 
     if (error.response?.status === 404) {
       toast.error(
-        "Maaf ada kesalahan teknis, silahkan hubungi admin. Kode 404"
+        "Maaf ada kesalahan teknis, silahkan hubungi admin. Kode 404",
       );
       error.isHandled = true;
     }
 
     if (error.response?.status === 403) {
       toast.error(
-        "Maaf, anda tidak diperbolehkan melakukan aksi ini. Kode 403"
+        "Maaf, anda tidak diperbolehkan melakukan aksi ini. Kode 403",
       );
       error.isHandled = true;
     }
 
     if (error.response?.status === 400) {
-      console.log(error.response);
+      console.error(error.response);
       toast.error(error.response?.data?.error?.message);
       error.isHandled = true;
     }
@@ -78,7 +78,7 @@ http.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default http;

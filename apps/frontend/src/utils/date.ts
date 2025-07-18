@@ -25,7 +25,7 @@ const dateUtils = {
   generateTimeIntervals: (
     start: string,
     end: string,
-    intervalMinutes: number
+    intervalMinutes: number,
   ) => {
     const times: string[] = [];
     let currentTime = dayjs(`2021-01-01T${start}`); // The date part is arbitrary
@@ -50,9 +50,9 @@ const dateUtils = {
       return [];
     }
     let dayjsStartDate = dayjs(startDate);
-    let dayjsEndDate = dayjs(endDate);
+    const dayjsEndDate = dayjs(endDate);
 
-    let dates: string[] = [];
+    const dates: string[] = [];
 
     while (
       dayjsStartDate.isBefore(dayjsEndDate) ||
@@ -177,7 +177,6 @@ const dateUtils = {
       case 7:
         return "Ahad";
       default:
-        // eslint-disable-next-line no-console
         console.error(dayNumber);
         return "Error";
     }
@@ -236,7 +235,7 @@ const dateUtils = {
     const days = Math.floor(diff / (60 * 60 * 24));
     const hours = Math.floor((diff - days * 60 * 60 * 24) / (60 * 60));
     const minutes = Math.floor(
-      (diff - days * 60 * 60 * 24 - hours * 60 * 60) / 60
+      (diff - days * 60 * 60 * 24 - hours * 60 * 60) / 60,
     );
     const seconds = diff - days * 60 * 60 * 24 - hours * 60 * 60 - minutes * 60;
 
