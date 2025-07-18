@@ -10,7 +10,7 @@ import { Control, Controller, useController } from "react-hook-form";
 interface Props
   extends Omit<SelectRootProps, "collection" | "value" | "multiple"> {
   control: Control;
-  options: { label: string; value: string }[];
+  options: { label: string; value: string | number }[];
   name: string;
   placeholder?: string;
   label?: string;
@@ -42,7 +42,7 @@ export const SelectField = ({
         <Field.Root invalid={Boolean(fieldState.error)}>
           <Select.Root
             value={
-              field.value === ""
+              !field.value
                 ? []
                 : [
                     options.items.find((item) => item.value === field.value)
