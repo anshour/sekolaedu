@@ -1,91 +1,96 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User } from "../models/user";
+import { UserAttribute, UserModel } from "../models/user";
 import knex from "../database/connection";
 import config from "../config";
 import { HttpError } from "../types/http-error";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import { paginate } from "~/utils/pagination";
 import emailService from "./email-service";
-import { removeObjectKeys } from "~/utils/array-manipulation";
 import StudentService from "./student-service";
 import TeacherService from "./teacher-service";
+import { Op } from "sequelize";
+import buildWhereQuery from "~/utils/query/build-where-query";
+import buildOrderQuery from "~/utils/query/build-order-query";
+import { RoleModel } from "~/models/role";
+import RoleService from "./role-service";
+import { PasswordResetModel } from "~/models/password_resets";
+import { TokenBlacklistModel } from "~/models/token_blacklist";
+import { PermissionModel } from "~/models/permission";
 
 class UserService {
   constructor() {}
 
-  static async createUser(user: Partial<User>): Promise<User> {
-    const hashedPassword = await this.hashPassword(user.password!);
+  static async createUser(userData: UserAttribute): Promise<UserAttribute> {
+    const hashedPassword = await this.hashPassword(userData.password!);
 
-    if (!user.role_id) {
+    if (!userData.role_id) {
       throw new HttpError("Role id is required", 400);
     }
 
-    const [insertedUser] = await knex("users")
-      .insert({
-        ...user,
+    const createdUser = (await UserModel.create(
+      {
+        ...userData,
         password: hashedPassword,
-      })
-      .returning("id");
+      },
+      {
+        raw: true,
+      },
+    )) as UserAttribute;
 
-    const roleName = await this.getRoleNameById(user.role_id!);
+    const roleName = await RoleService.getRoleNameById(createdUser.role_id!);
 
     if (roleName === "student") {
-      await StudentService.createFromUser(insertedUser.id);
+      await StudentService.createFromUser(createdUser.id);
     }
 
     if (roleName === "teacher") {
-      await TeacherService.createFromUser(insertedUser.id);
+      await TeacherService.createFromUser(createdUser.id);
     }
 
-    return { id: insertedUser.id, ...user } as User;
+    delete createdUser.password;
+
+    return createdUser;
   }
 
-  static async getById(id: number): Promise<User | null> {
-    const user = await knex("users")
-      .select("id", "name", "email", "role_id", "photo_url", "is_active")
-      .where({ id })
-      .first();
+  static async getById(id: number): Promise<UserAttribute | null> {
+    const user = await UserModel.findOne({
+      where: {
+        id,
+      },
+      raw: true,
+      nest: true,
+      include: {
+        model: RoleModel,
+        as: "role",
+        attributes: ["id", "name"],
+      },
+    });
 
-    if (!user) {
-      return null;
-    }
-
-    const roleName = await this.getRoleNameById(user.role_id);
-
-    return {
-      ...user,
-      role_name: roleName,
-    };
+    return user;
   }
 
-  static async getByEmail(email: string): Promise<User | null> {
-    const user = await knex("users")
-      .select("id", "name", "email", "role_id", "password")
-      .where({ email })
-      .first();
+  static async getByEmail(
+    email: string,
+    withPassword = false,
+  ): Promise<UserModel | null> {
+    const UserModelScoped = withPassword
+      ? UserModel.scope("withPassword")
+      : UserModel;
 
-    if (!user) {
-      return null;
-    }
+    const user = await UserModelScoped.findOne({
+      where: {
+        email,
+      },
+      raw: true,
+      nest: true,
+      include: {
+        model: RoleModel,
+        as: "role",
+        attributes: ["id", "name"],
+      },
+    });
 
-    const roleName = await this.getRoleNameById(user.role_id);
-
-    return {
-      ...user,
-      role_name: roleName,
-    };
-  }
-
-  private static async getRoleNameById(
-    roleId: number | null,
-  ): Promise<string | null> {
-    if (!roleId) {
-      return null;
-    }
-
-    const role = await knex("roles").where({ id: roleId }).first();
-    return role ? role.name : null;
+    return user;
   }
 
   static async isEmailTaken(email: string): Promise<boolean> {
@@ -94,7 +99,7 @@ class UserService {
   }
 
   static async authenticateUser(email: string, password: string): Promise<any> {
-    const user = await this.getByEmail(email);
+    const user = await this.getByEmail(email, true);
 
     if (!user) {
       throw new HttpError("Invalid email or password", 401);
@@ -118,7 +123,7 @@ class UserService {
     return userData;
   }
 
-  static async generateUserToken(user: User): Promise<string> {
+  static async generateUserToken(user: UserAttribute): Promise<string> {
     const data = {
       user_id: user.id,
       exp: Math.floor(Date.now() / 1000) + 60 * config.jwtExpireMinutes,
@@ -131,7 +136,7 @@ class UserService {
     return encoded;
   }
 
-  static async generateResetToken(user: User): Promise<string> {
+  static async generateResetToken(user: UserAttribute): Promise<string> {
     const data = {
       userId: user.id,
       exp: Math.floor(Date.now() / 1000) + 60 * 60,
@@ -141,14 +146,17 @@ class UserService {
   }
 
   static async resetPassword(
-    user: User,
+    user: UserAttribute,
     password: string,
     token: string,
   ): Promise<void> {
-    const reset = await knex("password_resets")
-      .where({ user_id: user.id, email: user.email })
-      .orderBy("created_at", "desc")
-      .first();
+    const reset = await PasswordResetModel.findOne({
+      where: {
+        user_id: user.id,
+        email: user.email,
+      },
+      raw: true,
+    });
 
     if (!reset) {
       throw new HttpError("Invalid or expired token", 400);
@@ -166,29 +174,43 @@ class UserService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    await knex("users")
-      .where({ id: user.id })
-      .update({ password: hashedPassword });
+    await UserModel.update(
+      {
+        password: hashedPassword,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      },
+    );
 
-    await knex("password_resets").where({ id: reset.id }).delete();
+    await PasswordResetModel.destroy({
+      where: {
+        id: reset.id,
+      },
+    });
   }
 
-  static async sendResetPasswordEmail(user: User): Promise<void> {
+  static async sendResetPasswordEmail(user: UserAttribute): Promise<void> {
     const token = this.generateRandomString(32);
     const resetLink = `${config.frontendUrl}/auth/reset-password?token=${token}&email=${user.email}`;
 
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 30);
 
-    await knex("password_resets")
-      .where({ email: user.email, user_id: user.id })
-      .delete();
+    await PasswordResetModel.destroy({
+      where: {
+        email: user.email,
+        user_id: user.id,
+      },
+    });
 
-    await knex("password_resets").insert({
+    await PasswordResetModel.create({
       user_id: user.id,
       email: user.email,
       expires_at: expiresAt,
-      token: bcrypt.hashSync(token, 10),
+      token: await bcrypt.hash(token, 10),
     });
 
     await emailService.sendPasswordResetEmail(user.email, resetLink);
@@ -196,42 +218,44 @@ class UserService {
 
   static async getAll(
     params: PaginationParams,
-  ): Promise<PaginationResult<User>> {
-    const query = knex("users")
-      .join("roles", "users.role_id", "roles.id")
-      .select([
-        "users.id",
-        "users.name",
-        "users.email",
-        "users.is_active",
-        "roles.name AS role_name",
-        "roles.id AS role_id",
-      ]);
+  ): Promise<PaginationResult<UserModel>> {
+    const whereQuery = buildWhereQuery(params.filter, {
+      search: (value) => ({
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${value}%` } },
+          { email: { [Op.iLike]: `%${value}%` } },
+        ],
+      }),
+      name: (value) => ({ [Op.iLike]: `%${value}%` }),
+      email: (value) => ({ [Op.iLike]: `%${value}%` }),
+      is_active: (value) => value === "true" || value === true,
+    });
 
-    const search = params.filter?.search || "";
+    const orderQuery = buildOrderQuery(params.sort);
 
-    if (search) {
-      query.where(function () {
-        this.where("users.name", "ILIKE", `%${search}%`).orWhere(
-          "users.email",
-          "ILIKE",
-          `%${search}%`,
-        );
-      });
-    }
-    const cleanParams = removeObjectKeys(params, ["filter.search"]);
+    const paginatedUsers = await UserModel.paginate({
+      page: params.page,
+      limit: params.limit,
+      where: whereQuery,
+      order: orderQuery,
+    });
 
-    const paginatedData = await paginate<User>(query, cleanParams, "users.id");
-
-    return paginatedData;
+    return paginatedUsers;
   }
 
   static async updateUser(
     id: number,
-    updateData: Partial<User>,
-  ): Promise<User> {
-    await knex("users").where({ id }).update(updateData);
-    return this.getById(id) as Promise<User>;
+    updateData: Partial<UserAttribute>,
+  ): Promise<UserAttribute> {
+    await UserModel.update(updateData, {
+      where: {
+        id,
+      },
+    });
+
+    const user = await this.getById(id);
+
+    return user!;
   }
 
   private static generateRandomString(length: number): string {
@@ -277,24 +301,44 @@ class UserService {
     roleId: number | null,
     userId: number,
   ): Promise<string[]> {
-    const rolebasedPermissions = await knex("role_permissions")
-      .join("permissions", "role_permissions.permission_id", "permissions.id")
-      .where({ role_id: roleId })
-      .select(["permissions.name", "permissions.id"]);
+    // Get role-based permissions using Sequelize
+    const rolebasedPermissions = await RolePermissionModel.findAll({
+      where: { role_id: roleId },
+      include: [
+        {
+          model: PermissionModel,
+          as: "permission",
+          attributes: ["id", "name"],
+        },
+      ],
+      attributes: [],
+      raw: true,
+      nest: true,
+    });
 
-    const specificPermissions = await knex("user_permissions")
-      .join("permissions", "user_permissions.permission_id", "permissions.id")
-      .where({ user_id: userId })
-      .select(["permissions.name", "permissions.id"]);
+    // Get user-specific permissions using Sequelize
+    const specificPermissions = await UserPermissionModel.findAll({
+      where: { user_id: userId },
+      include: [
+        {
+          model: PermissionModel,
+          as: "permission",
+          attributes: ["id", "name"],
+        },
+      ],
+      attributes: [],
+      raw: true,
+      nest: true,
+    });
 
     const uniquePermissions = new Map();
 
-    rolebasedPermissions.forEach((permission) => {
-      uniquePermissions.set(permission.id, permission.name);
+    rolebasedPermissions.forEach((item: any) => {
+      uniquePermissions.set(item.permission.id, item.permission.name);
     });
 
-    specificPermissions.forEach((permission) => {
-      uniquePermissions.set(permission.id, permission.name);
+    specificPermissions.forEach((item: any) => {
+      uniquePermissions.set(item.permission.id, item.permission.name);
     });
 
     return Array.from(uniquePermissions.values());
@@ -304,9 +348,10 @@ class UserService {
     userId: number,
     permissionId: number,
   ): Promise<void> {
-    const permission = await knex("permissions")
-      .where({ id: permissionId })
-      .first();
+    const permission = await PermissionModel.findOne({
+      where: { id: permissionId },
+      raw: true,
+    });
 
     if (!permission) {
       throw new HttpError(
@@ -315,7 +360,7 @@ class UserService {
       );
     }
 
-    await knex("user_permissions").insert({
+    await UserPermissionModel.create({
       user_id: userId,
       permission_id: permission.id,
     });
@@ -325,9 +370,10 @@ class UserService {
     userId: number,
     permissionId: number,
   ): Promise<void> {
-    const permission = await knex("permissions")
-      .where({ id: permissionId })
-      .first();
+    const permission = await PermissionModel.findOne({
+      where: { id: permissionId },
+      raw: true,
+    });
 
     if (!permission) {
       throw new HttpError(
@@ -336,12 +382,12 @@ class UserService {
       );
     }
 
-    await knex("user_permissions")
-      .where({
+    await UserPermissionModel.destroy({
+      where: {
         user_id: userId,
         permission_id: permission.id,
-      })
-      .delete();
+      },
+    });
   }
 
   static async blacklistToken(token: string, userId: number): Promise<void> {
@@ -350,7 +396,7 @@ class UserService {
       const decoded = jwt.verify(token, config.jwtSecretKey) as { exp: number };
       const expiresAt = new Date(decoded.exp * 1000);
 
-      await knex("token_blacklist").insert({
+      await TokenBlacklistModel.create({
         token,
         user_id: userId,
         expires_at: expiresAt,
@@ -361,18 +407,24 @@ class UserService {
   }
 
   static async isTokenBlacklisted(token: string): Promise<boolean> {
-    const blacklistedToken = await knex("token_blacklist")
-      .where({ token })
-      .andWhere("expires_at", ">", new Date())
-      .first();
+    const blacklistedToken = await TokenBlacklistModel.findOne({
+      where: {
+        token,
+      },
+      raw: false,
+    });
 
-    return !!blacklistedToken;
+    return blacklistedToken !== null;
   }
 
   static async cleanupExpiredTokens(): Promise<void> {
-    await knex("token_blacklist")
-      .where("expires_at", "<=", new Date())
-      .delete();
+    await TokenBlacklistModel.destroy({
+      where: {
+        expires_at: {
+          [Op.lt]: new Date(),
+        },
+      },
+    });
   }
 }
 
