@@ -16,6 +16,8 @@ import RoleService from "./role-service";
 import { PasswordResetModel } from "~/models/password_resets";
 import { TokenBlacklistModel } from "~/models/token_blacklist";
 import { PermissionModel } from "~/models/permission";
+import { UserPermissionModel } from "~/models/user-permission";
+import { RolePermissionModel } from "~/models/role-permission";
 
 class UserService {
   constructor() {}
@@ -298,7 +300,7 @@ class UserService {
   }
 
   static async getPermissions(
-    roleId: number | null,
+    roleId: number,
     userId: number,
   ): Promise<string[]> {
     // Get role-based permissions using Sequelize
