@@ -1,10 +1,50 @@
-export interface Subject {
-  id: number;
-  classroom_id: number;
-  classroom_name?: string; // Computed property from join
-  teacher_id?: number | null;
-  teacher_name?: string; // Computed property from join
-  name: string;
-  created_at: string;
-  updated_at: string;
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+} from "sequelize";
+import { baseInit, BaseModel } from "./base";
+
+export class SubjectModel extends BaseModel<
+  InferAttributes<SubjectModel>,
+  InferCreationAttributes<SubjectModel>
+> {
+  declare id: CreationOptional<number>;
+  declare classroom_id: number;
+  declare teacher_id: number | null;
+  declare name: string;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 }
+
+export interface SubjectAttribute extends InferAttributes<SubjectModel> {}
+
+SubjectModel.init(
+  {
+    id: {
+      type: DataTypes.BIGINT,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    classroom_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
+    teacher_id: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE,
+  },
+  {
+    ...baseInit,
+    modelName: "Subject",
+    tableName: "subjects",
+  },
+);
