@@ -23,9 +23,7 @@ export class PaginationError extends Error {
 /**
  * Fungsi paginate untuk Sequelize models
  * @param ModelClass - Sequelize Model class
- * @param page - Nomor halaman (dimulai dari 1)
- * @param limit - Jumlah item per halaman
- * @param findOptions - Sequelize find options (where, include, order, dll)
+ * @param Options - Sequelize find options (where, include, order, dll + page)
  * @returns Promise<PaginationResult<T>>
  */
 
