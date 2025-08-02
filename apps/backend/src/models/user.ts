@@ -31,7 +31,7 @@ export interface UserAttribute extends InferAttributes<UserModel> {}
 UserModel.init(
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true,
     },
