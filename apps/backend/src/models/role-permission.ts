@@ -5,6 +5,8 @@ import {
   InferCreationAttributes,
 } from "sequelize";
 import { baseInit, BaseModel } from "./base";
+import { PermissionModel } from "./permission";
+import { RoleModel } from "./role";
 
 export class RolePermissionModel extends BaseModel<
   InferAttributes<RolePermissionModel>,
@@ -51,3 +53,13 @@ RolePermissionModel.init(
     tableName: "role_permissions",
   },
 );
+
+RolePermissionModel.belongsTo(PermissionModel, {
+  foreignKey: "permission_id",
+  as: "permission",
+});
+
+RolePermissionModel.belongsTo(RoleModel, {
+  foreignKey: "role_id",
+  as: "role",
+});

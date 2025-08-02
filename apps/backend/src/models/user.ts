@@ -16,7 +16,7 @@ export class UserModel extends BaseModel<
   declare name: string;
   declare photo_url: string | null;
   declare email: string;
-  declare is_active: boolean;
+  declare is_active: CreationOptional<boolean>;
   declare password?: string;
   declare role_id: number;
 
