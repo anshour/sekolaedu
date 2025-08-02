@@ -1,7 +1,7 @@
 import type { Knex } from "knex";
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.schema.createTable("token_blacklist", (table) => {
+  await knex.schema.createTable("token_blacklists", (table) => {
     table.increments("id").primary();
     table.text("token").notNullable().unique();
     table
@@ -16,5 +16,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.schema.dropTableIfExists("token_blacklist");
+  await knex.schema.dropTableIfExists("token_blacklists");
 }

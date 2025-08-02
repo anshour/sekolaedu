@@ -1,14 +1,14 @@
 import { paginate } from "~/utils/pagination";
 import db from "../database/connection";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import { Student } from "~/models/student";
 import { attachBelongsTo } from "~/utils/attach-relation";
 import { removeObjectKeys } from "~/utils/array-manipulation";
+import { StudentAttribute } from "~/models/student";
 
 class StudentService {
   static async getAll(
     params: PaginationParams,
-  ): Promise<PaginationResult<Student>> {
+  ): Promise<PaginationResult<StudentAttribute>> {
     const query = db("students")
       .join("users", "students.user_id", "users.id")
       .select("students.*", "users.name as user_name");
@@ -35,7 +35,11 @@ class StudentService {
     }
     cleanParams = removeObjectKeys(params, ["filter.search"]);
 
-    const data = await paginate<Student>(query, cleanParams, "students.id");
+    const data = await paginate<StudentAttribute>(
+      query,
+      cleanParams,
+      "students.id",
+    );
 
     const studentsWithClassroom = await attachBelongsTo(data.data, {
       foreignKey: "current_classroom_id",
@@ -51,7 +55,7 @@ class StudentService {
     };
   }
 
-  static async createFromUser(userId: number): Promise<Student> {
+  static async createFromUser(userId: number): Promise<StudentAttribute> {
     const [newStudent] = await db("students")
       .insert({
         user_id: userId,

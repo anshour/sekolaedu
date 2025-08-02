@@ -7,7 +7,10 @@ interface UserStore {
     id: number;
     name: string;
     role_id: number;
-    role_name: string;
+    role: {
+      id: number;
+      name: string;
+    };
     email: string;
     photo_url: string;
     permissions?: string[];
@@ -47,8 +50,8 @@ const useUser = create<UserStore>()(
           state?.onHydrated();
         }
       },
-    }
-  )
+    },
+  ),
 );
 
 export default useUser;

@@ -50,7 +50,7 @@ const StudentLayout = ({ children }: { children: ReactNode }) => {
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
 
-    if (user?.role_name !== "student") {
+    if (user?.role?.name !== "student") {
       router.replace("/403");
     }
   }, [user]);

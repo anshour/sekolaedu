@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import config from "~/config";
 import UserService from "~/services/user-service";
+import AuthService from "~/services/auth-service";
 import { HttpError } from "~/types/http-error";
 import logger from "~/utils/logger";
 
@@ -13,7 +14,7 @@ async function authenticate(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    const isBlacklisted = await UserService.isTokenBlacklisted(token);
+    const isBlacklisted = await AuthService.isTokenBlacklisted(token);
     if (isBlacklisted) {
       throw new HttpError("Token has been invalidated", 401);
     }

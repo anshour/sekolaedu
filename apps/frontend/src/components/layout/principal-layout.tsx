@@ -44,7 +44,7 @@ const PrincipalLayout = ({ children }: { children: ReactNode }) => {
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
 
-    if (user?.role_name !== "principal") {
+    if (user?.role?.name !== "principal") {
       router.replace("/403");
     }
   }, [user]);

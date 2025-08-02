@@ -98,7 +98,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
 
-    if (user?.role_name !== "admin") {
+    if (user?.role?.name !== "admin") {
       router.replace("/403");
     }
   }, [user]);

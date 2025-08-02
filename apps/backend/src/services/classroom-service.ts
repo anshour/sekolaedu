@@ -1,8 +1,8 @@
+import { ClassroomAttribute } from "~/models/classroom";
 import db from "../database/connection";
-import { Classroom } from "~/models/classroom";
 
 class ClassroomService {
-  static async getAll(): Promise<Classroom[]> {
+  static async getAll(): Promise<ClassroomAttribute[]> {
     const classrooms = await db("classrooms")
       .leftJoin("teachers", "classrooms.guardian_teacher_id", "teachers.id")
       .leftJoin("users", "teachers.user_id", "users.id")
@@ -12,7 +12,7 @@ class ClassroomService {
     return classrooms;
   }
 
-  static async create(data: Partial<Classroom>): Promise<Classroom> {
+  static async create(data: Partial<ClassroomAttribute>): Promise<ClassroomAttribute> {
     const [classroom] = await db("classrooms").insert(data).returning("*");
 
     return classroom;
@@ -20,8 +20,8 @@ class ClassroomService {
 
   static async update(
     id: number,
-    data: Partial<Classroom>,
-  ): Promise<Classroom | null> {
+    data: Partial<ClassroomAttribute>,
+  ): Promise<ClassroomAttribute | null> {
     const [classroom] = await db("classrooms")
       .where({ id })
       .update(data)
@@ -30,7 +30,7 @@ class ClassroomService {
     return classroom || null;
   }
 
-  static async getById(id: number): Promise<Classroom | null> {
+  static async getById(id: number): Promise<ClassroomAttribute | null> {
     const classroom = await db("classrooms")
       .where("classrooms.id", id)
       .leftJoin("teachers", "classrooms.guardian_teacher_id", "teachers.id")

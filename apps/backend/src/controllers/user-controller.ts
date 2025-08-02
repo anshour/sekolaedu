@@ -1,14 +1,15 @@
-import { type Request, type Response } from "express";
-import validate from "~/utils/validate";
-import { createPaginationSchema } from "~/types/pagination";
-import UserService from "~/services/user-service";
-import { z } from "zod/v4";
-import emailService from "~/services/email-service";
 import cloudStorageService from "~/services/cloud-storage-service";
-import fs from "fs";
-import logger from "~/utils/logger";
-import resizeImage from "~/utils/resize-image";
+import { createPaginationSchema } from "~/types/pagination";
+import { type Request, type Response } from "express";
+import emailService from "~/services/email-service";
+import UserService from "~/services/user-service";
+import AuthService from "~/services/auth-service";
 import { HttpError } from "~/types/http-error";
+import resizeImage from "~/utils/resize-image";
+import validate from "~/utils/validate";
+import logger from "~/utils/logger";
+import { z } from "zod/v4";
+import fs from "fs";
 
 const userController = {
   async bulkCreateUsers(req: Request, res: Response) {
@@ -79,7 +80,7 @@ const userController = {
 
   async getAllUsers(req: Request, res: Response) {
     const schema = createPaginationSchema({
-      allowedFilters: ["name", "email", "search"],
+      allowedFilters: ["name", "email", "search", "is_active"],
       allowedSorts: ["name", "email", "role_name", "is_active"],
     });
 
@@ -96,13 +97,14 @@ const userController = {
       throw new HttpError("User not found", 404);
     }
 
-    const token = await UserService.generateUserToken(user);
+    const token = await AuthService.generateUserToken(user);
 
     res.status(200).json({
       message: "Token generated successfully",
       token,
     });
   },
+
   async getUserById(req: Request, res: Response) {
     const user = await UserService.getById(Number(req.params.id));
     if (!user) {

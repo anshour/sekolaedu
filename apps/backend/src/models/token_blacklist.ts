@@ -6,45 +6,39 @@ import {
 } from "sequelize";
 import { baseInit, BaseModel } from "./base";
 
-export class SubjectModel extends BaseModel<
-  InferAttributes<SubjectModel>,
-  InferCreationAttributes<SubjectModel>
+export class TokenBlacklistModel extends BaseModel<
+  InferAttributes<TokenBlacklistModel>,
+  InferCreationAttributes<TokenBlacklistModel>
 > {
   declare id: CreationOptional<number>;
-  declare classroom_id: number;
-  declare teacher_id: number | null;
-  declare name: string;
+  declare token: string;
+  declare user_id: number;
+  declare expires_at: Date;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
 }
 
-export interface SubjectAttribute extends InferAttributes<SubjectModel> {}
-
-SubjectModel.init(
+TokenBlacklistModel.init(
   {
     id: {
       type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true,
     },
-    classroom_id: {
+    user_id: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-    teacher_id: {
-      type: DataTypes.BIGINT,
-      allowNull: true,
-    },
-    name: {
+    token: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    expires_at: {
+      type: DataTypes.DATE,
       allowNull: false,
     },
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE,
   },
-  {
-    ...baseInit,
-    modelName: "Subject",
-    tableName: "subjects",
-  },
+  { ...baseInit, modelName: "TokenBlackist", tableName: "token_blacklists" },
 );

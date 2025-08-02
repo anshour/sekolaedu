@@ -16,6 +16,7 @@ import subjectRouter from "./routers/subject-router";
 import classroomRouter from "./routers/classroom-router";
 import teacherRouter from "./routers/teacher-router";
 import acYearRouter from "./routers/academic-year-router";
+import sequelize from "./database/sequelize";
 
 const app = express();
 
@@ -62,6 +63,15 @@ app.get("/", (req, res) => {
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Database connection has been established successfully.");
+  } catch (err) {
+    console.log(err);
+  }
+})();
 
 app.listen(config.port, () => {
   console.log(`Server running on http://localhost:${config.port}`);
