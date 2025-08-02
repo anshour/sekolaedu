@@ -101,7 +101,7 @@ export default function Page() {
                 <DataProperty
                   isLoading={isFetching}
                   label="Role"
-                  value={user?.role_name}
+                  value={user?.role?.name}
                 />
                 <DataProperty
                   isLoading={isFetching}

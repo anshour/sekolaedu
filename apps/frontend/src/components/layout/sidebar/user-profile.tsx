@@ -52,7 +52,7 @@ export const UserProfile = () => {
                 {user?.name}
               </Text>
               <Text fontSize="xs" color="gray.300">
-                {user?.role_name}
+                {user?.role?.name}
               </Text>
             </Box>
             <EllipsisVertical size="18" color="white" />
@@ -63,7 +63,7 @@ export const UserProfile = () => {
         <MenuItem
           as={Link}
           // @ts-expect-error
-          href={`/dashboard/${user?.role_name}/profile`}
+          href={`/dashboard/${user?.role?.name}/profile`}
           width="200px"
           value="profile"
         >

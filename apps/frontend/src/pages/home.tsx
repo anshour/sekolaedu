@@ -11,14 +11,14 @@ export default function Home() {
   const redirectToDashboard = async () => {
     // await useUser.getState().refetchUser();
 
-    const roleRoute = DASHBOARD_ROUTES[user!.role_name];
+    const roleRoute = DASHBOARD_ROUTES[user!.role?.name];
     if (roleRoute) {
       router.push(roleRoute);
     } else {
       router.push(
         `/error?message=Unauthorized access for role ${
-          user!.role_name
-        }.code_r1&previous_path=/home`
+          user!.role?.name
+        }.code_r1&previous_path=/home`,
       );
     }
   };
@@ -39,9 +39,8 @@ export default function Home() {
       router.push("/auth/login");
       return;
     }
-    
-    redirectToDashboard();
 
+    redirectToDashboard();
   }, [user, isRefetched]);
 
   return <>Please wait...</>;

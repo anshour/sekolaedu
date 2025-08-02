@@ -33,7 +33,7 @@ export default function Page() {
     if (isAuthenticated && user) {
       if (redirectUrl) {
         // Validate if user role is allowed to access the redirect URL
-        if (validateRedirectUrl(redirectUrl, user.role_name)) {
+        if (validateRedirectUrl(redirectUrl, user.role?.name)) {
           router.push(redirectUrl);
         } else {
           // If not allowed, redirect to user's default dashboard
