@@ -1,15 +1,15 @@
 import { paginate } from "~/utils/pagination";
 import db from "../database/connection";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import { Subject } from "~/models/subject";
 import { HttpError } from "~/types/http-error";
 import TeacherService from "./teacher-service";
 import ClassroomService from "./classroom-service";
+import { SubjectAttribute } from "~/models/subject";
 
 class SubjectService {
   static async getAll(
     params: PaginationParams,
-  ): Promise<PaginationResult<Subject>> {
+  ): Promise<PaginationResult<SubjectAttribute>> {
     const query = db("subjects")
       .join("classrooms", "subjects.classroom_id", "classrooms.id")
       .leftJoin("teachers", "subjects.teacher_id", "teachers.id")
@@ -20,12 +20,12 @@ class SubjectService {
         "users.name as teacher_name",
       );
 
-    const data = await paginate<Subject>(query, params, "subjects.id");
+    const data = await paginate<SubjectAttribute>(query, params, "subjects.id");
 
     return data;
   }
 
-  static async getById(id: number): Promise<Subject | null> {
+  static async getById(id: number): Promise<SubjectAttribute | null> {
     const subject = await db("subjects")
       .join("classrooms", "subjects.classroom_id", "classrooms.id")
       .leftJoin("teachers", "subjects.teacher_id", "teachers.id")
@@ -42,9 +42,9 @@ class SubjectService {
   }
 
   static async createSubject(
-    subjectData: Partial<Subject>,
+    subjectData: Partial<SubjectAttribute>,
     userId: number,
-  ): Promise<Subject> {
+  ): Promise<SubjectAttribute> {
     const classroom = await ClassroomService.getById(subjectData.classroom_id!);
 
     if (!classroom) {
@@ -65,7 +65,7 @@ class SubjectService {
 
     if (existingSubject) {
       throw new HttpError(
-        "Subject with this name already exists in the classroom",
+        "SubjectAttribute with this name already exists in the classroom",
         400,
       );
     }
@@ -77,16 +77,16 @@ class SubjectService {
       })
       .returning("id");
 
-    return this.getById(insertedSubject.id) as Promise<Subject>;
+    return this.getById(insertedSubject.id) as Promise<SubjectAttribute>;
   }
 
   static async updateSubject(
     id: number,
-    updateData: Partial<Subject>,
-  ): Promise<Subject> {
+    updateData: Partial<SubjectAttribute>,
+  ): Promise<SubjectAttribute> {
     const existingSubject = await this.getById(id);
     if (!existingSubject) {
-      throw new HttpError("Subject not found", 404);
+      throw new HttpError("SubjectAttribute not found", 404);
     }
 
     // If updating classroom_id, validate the new classroom exists
@@ -121,7 +121,7 @@ class SubjectService {
     }
 
     await db("subjects").where({ id }).update(updateData);
-    return this.getById(id) as Promise<Subject>;
+    return this.getById(id) as Promise<SubjectAttribute>;
   }
 
   static async deleteSubject(id: number): Promise<void> {

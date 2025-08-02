@@ -1,6 +1,6 @@
 import { paginate } from "~/utils/pagination";
 import db from "../database/connection";
-import { Role } from "~/models/role";
+import { RoleAttribute, RoleModel } from "~/models/role";
 import { attachManyToMany } from "~/utils/attach-relation";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 
@@ -28,6 +28,17 @@ class RoleService {
     return roleWithPermissions;
   }
 
+  static async getRoleNameById(id: number): Promise<string | null> {
+    const role = await RoleModel.findOne({
+      where: {
+        id,
+      },
+      raw: true,
+    });
+
+    return role?.name || "";
+  }
+
   static async isNameTaken(name: string): Promise<boolean> {
     const role = await db("roles").where({ name }).first();
     return role !== undefined;
@@ -44,10 +55,10 @@ class RoleService {
 
   static async getAll(
     params: PaginationParams,
-  ): Promise<PaginationResult<Role>> {
+  ): Promise<PaginationResult<RoleAttribute>> {
     const query = db("roles").select("*");
 
-    const data = await paginate<Role>(query, params);
+    const data = await paginate<RoleAttribute>(query, params);
 
     return data;
   }

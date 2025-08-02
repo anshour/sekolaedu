@@ -1,15 +1,15 @@
-import { AcademicYear } from "~/models/academic_year";
+import { AcademicYearAttribute } from "~/models/academic_year";
 import db from "../database/connection";
 import dayjs from "dayjs";
 
 class AcademicYearService {
-  static async getAll(): Promise<AcademicYear[]> {
+  static async getAll(): Promise<AcademicYearAttribute[]> {
     const academicYears = await db("academic_years").select("*");
 
     return academicYears;
   }
 
-  static async getActive(): Promise<AcademicYear | null> {
+  static async getActive(): Promise<AcademicYearAttribute | null> {
     const activeAcademicYear = await db("academic_years")
       .where({ is_active: true })
       .first();
@@ -17,13 +17,15 @@ class AcademicYearService {
     return activeAcademicYear || null;
   }
 
-  static async create(data: Partial<AcademicYear>): Promise<AcademicYear> {
+  static async create(
+    data: Partial<AcademicYearAttribute>,
+  ): Promise<AcademicYearAttribute> {
     const [newAcademicYear] = await db("academic_years")
       .insert(data)
       .returning("*");
 
     await this.renewActive();
-    
+
     return newAcademicYear;
   }
 
@@ -46,7 +48,6 @@ class AcademicYearService {
         .whereNot({ id: activeYear.id })
         .update({ is_active: false });
     }
-
   }
 }
 

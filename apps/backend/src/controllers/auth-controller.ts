@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
-import { z } from "zod/v4";
 import UserService from "~/services/user-service";
+import AuthService from "~/services/auth-service";
 import { HttpError } from "~/types/http-error";
 import validate from "~/utils/validate";
+import { z } from "zod/v4";
 
 const authController = {
   async login(req: Request, res: Response) {
@@ -13,8 +14,8 @@ const authController = {
 
     const { email, password } = validate(schema, req.body);
 
-    const user = await UserService.authenticateUser(email, password);
-    const token = await UserService.generateUserToken(user);
+    const user = await AuthService.authenticateUser(email, password);
+    const token = await AuthService.generateUserToken(user);
 
     res.json({ token, user });
   },
@@ -48,7 +49,7 @@ const authController = {
       role_id: roleStaffId,
     });
 
-    const token = await UserService.generateUserToken(user);
+    const token = await AuthService.generateUserToken(user);
 
     res.json({ token, user });
   },
@@ -67,7 +68,7 @@ const authController = {
       throw new HttpError("User not found", 404);
     }
 
-    await UserService.sendResetPasswordEmail(user);
+    await AuthService.sendResetPasswordEmail(user);
 
     res.json({ message: "Reset password link sent to your email" });
   },
@@ -92,8 +93,8 @@ const authController = {
       throw new HttpError("User not found", 404);
     }
 
-    await UserService.resetPassword(user, password, token);
-    const loginToken = await UserService.generateUserToken(user);
+    await AuthService.resetPassword(user, password, token);
+    const loginToken = await AuthService.generateUserToken(user);
 
     res.json({ message: "Password reset successfully", token: loginToken });
   },
@@ -120,7 +121,7 @@ const authController = {
     const token = req.token!;
     const userId = req.user!.id;
 
-    await UserService.blacklistToken(token, userId);
+    await AuthService.blacklistToken(token, userId);
 
     res.json({ message: "Logged out successfully" });
   },

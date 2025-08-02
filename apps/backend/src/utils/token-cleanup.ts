@@ -1,4 +1,4 @@
-import UserService from "~/services/user-service";
+import AuthService from "~/services/auth-service";
 import logger from "~/utils/logger";
 
 /**
@@ -8,7 +8,7 @@ import logger from "~/utils/logger";
  */
 export async function cleanupExpiredTokens(): Promise<void> {
   try {
-    await UserService.cleanupExpiredTokens();
+    await AuthService.cleanupExpiredTokens();
     logger.info("Successfully cleaned up expired tokens from blacklist");
   } catch (error) {
     logger.error("Failed to cleanup expired tokens:", error);
