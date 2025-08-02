@@ -1,20 +1,14 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { UserAttribute, UserModel } from "../models/user";
-import knex from "../database/connection";
-import config from "../config";
 import { HttpError } from "../types/http-error";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import emailService from "./email-service";
 import StudentService from "./student-service";
 import TeacherService from "./teacher-service";
-import { Op } from "sequelize";
+import { CreationAttributes, Op } from "sequelize";
 import buildWhereQuery from "~/utils/query/build-where-query";
 import buildOrderQuery from "~/utils/query/build-order-query";
 import { RoleModel } from "~/models/role";
 import RoleService from "./role-service";
-import { PasswordResetModel } from "~/models/password_resets";
-import { TokenBlacklistModel } from "~/models/token_blacklist";
 import { PermissionModel } from "~/models/permission";
 import { UserPermissionModel } from "~/models/user-permission";
 import { RolePermissionModel } from "~/models/role-permission";
@@ -22,7 +16,9 @@ import { RolePermissionModel } from "~/models/role-permission";
 class UserService {
   constructor() {}
 
-  static async createUser(userData: UserAttribute): Promise<UserAttribute> {
+  static async createUser(
+    userData: CreationAttributes<UserModel>,
+  ): Promise<UserAttribute> {
     const hashedPassword = await this.hashPassword(userData.password!);
 
     if (!userData.role_id) {
@@ -98,124 +94,6 @@ class UserService {
   static async isEmailTaken(email: string): Promise<boolean> {
     const user = await this.getByEmail(email);
     return !!user;
-  }
-
-  static async authenticateUser(email: string, password: string): Promise<any> {
-    const user = await this.getByEmail(email, true);
-
-    if (!user) {
-      throw new HttpError("Invalid email or password", 401);
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password!);
-
-    if (!isPasswordValid) {
-      throw new HttpError("Invalid email or password", 401);
-    }
-
-    const permissions = await this.getPermissions(user.role_id, user.id);
-
-    delete user.password;
-
-    const userData = {
-      ...user,
-      permissions,
-    };
-
-    return userData;
-  }
-
-  static async generateUserToken(user: UserAttribute): Promise<string> {
-    const data = {
-      user_id: user.id,
-      exp: Math.floor(Date.now() / 1000) + 60 * config.jwtExpireMinutes,
-    };
-
-    const encoded = jwt.sign(data, config.jwtSecretKey, {
-      algorithm: config.jwtHashAlgorithm,
-    });
-
-    return encoded;
-  }
-
-  static async generateResetToken(user: UserAttribute): Promise<string> {
-    const data = {
-      userId: user.id,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60,
-    };
-
-    return jwt.sign(data, config.jwtSecretKey);
-  }
-
-  static async resetPassword(
-    user: UserAttribute,
-    password: string,
-    token: string,
-  ): Promise<void> {
-    const reset = await PasswordResetModel.findOne({
-      where: {
-        user_id: user.id,
-        email: user.email,
-      },
-      raw: true,
-    });
-
-    if (!reset) {
-      throw new HttpError("Invalid or expired token", 400);
-    }
-
-    const isTokenValid = await bcrypt.compare(token, reset.token);
-    if (!isTokenValid) {
-      throw new HttpError("Invalid or expired token", 400);
-    }
-    const isTokenExpired = new Date() > reset.expires_at;
-
-    if (isTokenExpired) {
-      throw new HttpError("Invalid or expired token", 400);
-    }
-
-    const hashedPassword = await this.hashPassword(password);
-
-    await UserModel.update(
-      {
-        password: hashedPassword,
-      },
-      {
-        where: {
-          id: user.id,
-        },
-      },
-    );
-
-    await PasswordResetModel.destroy({
-      where: {
-        id: reset.id,
-      },
-    });
-  }
-
-  static async sendResetPasswordEmail(user: UserAttribute): Promise<void> {
-    const token = this.generateRandomString(32);
-    const resetLink = `${config.frontendUrl}/auth/reset-password?token=${token}&email=${user.email}`;
-
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 30);
-
-    await PasswordResetModel.destroy({
-      where: {
-        email: user.email,
-        user_id: user.id,
-      },
-    });
-
-    await PasswordResetModel.create({
-      user_id: user.id,
-      email: user.email,
-      expires_at: expiresAt,
-      token: await bcrypt.hash(token, 10),
-    });
-
-    await emailService.sendPasswordResetEmail(user.email, resetLink);
   }
 
   static async getAll(
@@ -388,43 +266,6 @@ class UserService {
       where: {
         user_id: userId,
         permission_id: permission.id,
-      },
-    });
-  }
-
-  static async blacklistToken(token: string, userId: number): Promise<void> {
-    try {
-      // Decode token to get expiration
-      const decoded = jwt.verify(token, config.jwtSecretKey) as { exp: number };
-      const expiresAt = new Date(decoded.exp * 1000);
-
-      await TokenBlacklistModel.create({
-        token,
-        user_id: userId,
-        expires_at: expiresAt,
-      });
-    } catch (error) {
-      throw new HttpError("Invalid token", 400);
-    }
-  }
-
-  static async isTokenBlacklisted(token: string): Promise<boolean> {
-    const blacklistedToken = await TokenBlacklistModel.findOne({
-      where: {
-        token,
-      },
-      raw: false,
-    });
-
-    return blacklistedToken !== null;
-  }
-
-  static async cleanupExpiredTokens(): Promise<void> {
-    await TokenBlacklistModel.destroy({
-      where: {
-        expires_at: {
-          [Op.lt]: new Date(),
-        },
       },
     });
   }
