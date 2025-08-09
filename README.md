@@ -14,7 +14,7 @@
 ## Technology Stack
 
 - **Frontend**: Next.js 15, TypeScript, Chakra UI, Zustand, React Query
-- **Backend**: Express.js, TypeScript, Knex.js, PostgreSQL
+- **Backend**: Express.js, TypeScript, Sequelize, PostgreSQL
 - **Deployment**: Docker, Google Cloud Run ready
 
 ## Folder Structure
