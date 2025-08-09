@@ -5,6 +5,8 @@ import {
   InferCreationAttributes,
 } from "sequelize";
 import { baseInit, BaseModel } from "./base";
+import { UserModel } from "./user";
+import { SubjectModel } from "./subject";
 
 export class TeacherModel extends BaseModel<
   InferAttributes<TeacherModel>,
@@ -15,31 +17,45 @@ export class TeacherModel extends BaseModel<
   declare type: "regular" | "assistant";
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
+
+  static associate() {
+    this.belongsTo(UserModel, {
+      foreignKey: "user_id",
+      as: "user",
+    });
+
+    this.hasMany(SubjectModel, {
+      foreignKey: "teacher_id",
+      as: "subjects",
+    });
+  }
+
+  static initModel() {
+    this.init(
+      {
+        id: {
+          type: DataTypes.BIGINT,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        user_id: {
+          type: DataTypes.BIGINT,
+          allowNull: false,
+        },
+        type: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        created_at: DataTypes.DATE,
+        updated_at: DataTypes.DATE,
+      },
+      {
+        ...baseInit,
+        modelName: "Teacher",
+        tableName: "teachers",
+      },
+    );
+  }
 }
 
 export interface TeacherAttribute extends InferAttributes<TeacherModel> {}
-
-TeacherModel.init(
-  {
-    id: {
-      type: DataTypes.BIGINT,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    user_id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-  },
-  {
-    ...baseInit,
-    modelName: "Teacher",
-    tableName: "teachers",
-  },
-);
