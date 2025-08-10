@@ -13,8 +13,8 @@ export class AcademicYearModel extends BaseModel<
 > {
   declare id: CreationOptional<number>;
   declare name: string;
-  declare start_date: Date;
-  declare end_date: Date;
+  declare start_date: string;
+  declare end_date: string;
   declare is_active: boolean;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
