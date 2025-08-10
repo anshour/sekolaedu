@@ -1,68 +1,59 @@
-import { paginate } from "~/utils/pagination";
-import db from "../database/connection";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import { attachBelongsTo } from "~/utils/attach-relation";
-import { removeObjectKeys } from "~/utils/array-manipulation";
-import { StudentAttribute } from "~/models/student";
+import {
+  ClassroomModel,
+  StudentAttribute,
+  StudentModel,
+  UserModel,
+} from "~/models";
+import buildWhereQuery from "~/utils/query/build-where-query";
+import { Op } from "sequelize";
+import buildOrderQuery from "~/utils/query/build-order-query";
 
 class StudentService {
   static async getAll(
     params: PaginationParams,
   ): Promise<PaginationResult<StudentAttribute>> {
-    const query = db("students")
-      .join("users", "students.user_id", "users.id")
-      .select("students.*", "users.name as user_name");
-
-    const userName = params.filter?.user_name || "";
-    if (userName) {
-      query.where(function () {
-        this.where("users.name", "ILIKE", `%${userName}%`);
-      });
-    }
-
-    let cleanParams = removeObjectKeys(params, ["filter.user_name"]);
-
-    const search = params.filter?.search || "";
-
-    if (search) {
-      query.where(function () {
-        this.where("users.name", "ILIKE", `%${search}%`).orWhere(
-          "students.identification_number",
-          "=",
-          search,
-        );
-      });
-    }
-    cleanParams = removeObjectKeys(params, ["filter.search"]);
-
-    const data = await paginate<StudentAttribute>(
-      query,
-      cleanParams,
-      "students.id",
-    );
-
-    const studentsWithClassroom = await attachBelongsTo(data.data, {
-      foreignKey: "current_classroom_id",
-      relatedTable: "classrooms",
-      relatedIdKey: "id",
-      relatedFields: ["id", "name", "level"],
-      outputKey: "classroom",
+    const whereQuery = buildWhereQuery(params.filter, {
+      search: (value) => ({
+        [Op.or]: [
+          { "$user.name$": { [Op.iLike]: `%${value}%` } },
+          { identification_number: { [Op.iLike]: `%${value}%` } },
+        ],
+      }),
+      user_name: (value) => ({ "$user.name$": { [Op.iLike]: `%${value}%` } }),
+      current_classroom_id: (value) => ({ [Op.eq]: value }),
     });
 
-    return {
-      ...data,
-      data: studentsWithClassroom,
-    };
+    const orderQuery = buildOrderQuery(params.sort);
+
+    const stduents = await StudentModel.paginate({
+      page: params.page,
+      limit: params.limit,
+      order: orderQuery,
+      where: whereQuery,
+      include: [
+        {
+          model: UserModel,
+          as: "user",
+          required: true,
+        },
+        {
+          model: ClassroomModel,
+          as: "current_classroom",
+          required: false,
+        },
+      ],
+    });
+
+    return stduents;
   }
 
   static async createFromUser(userId: number): Promise<StudentAttribute> {
-    const [newStudent] = await db("students")
-      .insert({
-        user_id: userId,
-        status: "active",
-        current_classroom_id: null,
-      })
-      .returning("*");
+    const newStudent = await StudentModel.create({
+      user_id: userId,
+      status: "active",
+      current_classroom_id: null,
+    });
 
     return newStudent;
   }

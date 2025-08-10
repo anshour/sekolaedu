@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import { UserAttribute, UserModel } from "../models/user";
 import { HttpError } from "../types/http-error";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 import StudentService from "./student-service";
@@ -7,11 +6,14 @@ import TeacherService from "./teacher-service";
 import { CreationAttributes, Op } from "sequelize";
 import buildWhereQuery from "~/utils/query/build-where-query";
 import buildOrderQuery from "~/utils/query/build-order-query";
-import { RoleModel } from "~/models/role";
 import RoleService from "./role-service";
-import { PermissionModel } from "~/models/permission";
-import { UserPermissionModel } from "~/models/user-permission";
-import { RolePermissionModel } from "~/models/role-permission";
+import {
+  PermissionableModel,
+  PermissionModel,
+  RoleModel,
+  UserAttribute,
+  UserModel,
+} from "~/models";
 
 class UserService {
   constructor() {}
@@ -35,13 +37,13 @@ class UserService {
       },
     )) as UserAttribute;
 
-    const roleName = await RoleService.getRoleNameById(createdUser.role_id!);
+    const roleCode = await RoleService.getRoleCodeById(createdUser.role_id!);
 
-    if (roleName === "student") {
+    if (roleCode === "student") {
       await StudentService.createFromUser(createdUser.id);
     }
 
-    if (roleName === "teacher") {
+    if (roleCode === "teacher") {
       await TeacherService.createFromUser(createdUser.id);
     }
 
@@ -60,7 +62,7 @@ class UserService {
       include: {
         model: RoleModel,
         as: "role",
-        attributes: ["id", "name"],
+        attributes: ["id", "label"],
       },
     });
 
@@ -84,7 +86,7 @@ class UserService {
       include: {
         model: RoleModel,
         as: "role",
-        attributes: ["id", "name"],
+        attributes: ["id", "label"],
       },
     });
 
@@ -177,18 +179,17 @@ class UserService {
     return bcrypt.hash(password, 12);
   }
 
-  static async getPermissions(
+  static async getPermissionCodes(
     roleId: number,
     userId: number,
   ): Promise<string[]> {
-    // Get role-based permissions using Sequelize
-    const rolebasedPermissions = await RolePermissionModel.findAll({
-      where: { role_id: roleId },
+    const rolebasedPermissions = await PermissionableModel.findAll({
+      where: { permission_id: roleId, permissionable_type: "role" },
       include: [
         {
           model: PermissionModel,
           as: "permission",
-          attributes: ["id", "name"],
+          attributes: ["id", "code"],
         },
       ],
       attributes: [],
@@ -197,13 +198,13 @@ class UserService {
     });
 
     // Get user-specific permissions using Sequelize
-    const specificPermissions = await UserPermissionModel.findAll({
-      where: { user_id: userId },
+    const specificPermissions = await PermissionableModel.findAll({
+      where: { permissionable_id: userId, permissionable_type: "user" },
       include: [
         {
           model: PermissionModel,
           as: "permission",
-          attributes: ["id", "name"],
+          attributes: ["id", "code"],
         },
       ],
       attributes: [],
@@ -214,11 +215,11 @@ class UserService {
     const uniquePermissions = new Map();
 
     rolebasedPermissions.forEach((item: any) => {
-      uniquePermissions.set(item.permission.id, item.permission.name);
+      uniquePermissions.set(item.permission.id, item.permission.code);
     });
 
     specificPermissions.forEach((item: any) => {
-      uniquePermissions.set(item.permission.id, item.permission.name);
+      uniquePermissions.set(item.permission.id, item.permission.code);
     });
 
     return Array.from(uniquePermissions.values());
@@ -240,9 +241,10 @@ class UserService {
       );
     }
 
-    await UserPermissionModel.create({
-      user_id: userId,
+    await PermissionableModel.create({
+      permissionable_id: userId,
       permission_id: permission.id,
+      permissionable_type: "user",
     });
   }
 
@@ -262,10 +264,11 @@ class UserService {
       );
     }
 
-    await UserPermissionModel.destroy({
+    await PermissionableModel.destroy({
       where: {
-        user_id: userId,
+        permissionable_id: userId,
         permission_id: permission.id,
+        permissionable_type: "user",
       },
     });
   }

@@ -1,67 +1,133 @@
-import { ClassroomAttribute } from "~/models/classroom";
-import db from "../database/connection";
+import { CreationAttributes } from "sequelize";
+import {
+  ClassroomAttribute,
+  ClassroomMemberModel,
+  ClassroomModel,
+  StudentModel,
+  TeacherModel,
+  UserModel,
+} from "~/models";
 
 class ClassroomService {
   static async getAll(): Promise<ClassroomAttribute[]> {
-    const classrooms = await db("classrooms")
-      .leftJoin("teachers", "classrooms.guardian_teacher_id", "teachers.id")
-      .leftJoin("users", "teachers.user_id", "users.id")
-      .orderBy("classrooms.level")
-      .select("classrooms.*", "users.name as guardian_teacher_name");
+    const classrooms = await ClassroomModel.findAll({
+      include: [
+        {
+          model: TeacherModel,
+          as: "guardian_teacher",
+          include: [
+            {
+              model: UserModel,
+              as: "user",
+              attributes: ["name"],
+            },
+          ],
+        },
+      ],
+      order: [["level", "ASC"]],
+    });
 
     return classrooms;
   }
 
-  static async create(data: Partial<ClassroomAttribute>): Promise<ClassroomAttribute> {
-    const [classroom] = await db("classrooms").insert(data).returning("*");
-
-    return classroom;
+  static async create(
+    data: CreationAttributes<ClassroomModel>,
+  ): Promise<ClassroomAttribute> {
+    console.log("Creating classroom with data:", data);
+    return ClassroomModel.create(data, { raw: true });
   }
 
   static async update(
     id: number,
-    data: Partial<ClassroomAttribute>,
+    data: Partial<CreationAttributes<ClassroomModel>>,
   ): Promise<ClassroomAttribute | null> {
-    const [classroom] = await db("classrooms")
-      .where({ id })
-      .update(data)
-      .returning("*");
+    await ClassroomModel.update(data, {
+      where: { id },
+    });
 
-    return classroom || null;
+    const updatedClassroom = await ClassroomModel.findByPk(id, {
+      raw: true,
+      include: [
+        {
+          model: TeacherModel,
+          as: "guardian_teacher",
+          include: [
+            {
+              model: UserModel,
+              as: "user",
+              attributes: ["name"],
+            },
+          ],
+        },
+      ],
+    });
+
+    return updatedClassroom;
   }
 
   static async getById(id: number): Promise<ClassroomAttribute | null> {
-    const classroom = await db("classrooms")
-      .where("classrooms.id", id)
-      .leftJoin("teachers", "classrooms.guardian_teacher_id", "teachers.id")
-      .leftJoin("users", "teachers.user_id", "users.id")
-      .orderBy("classrooms.level")
-      .select("classrooms.*", "users.name as guardian_teacher_name")
-      .first();
+    const classroom = await ClassroomModel.findByPk(id, {
+      raw: true,
+      include: [
+        {
+          model: TeacherModel,
+          as: "guardian_teacher",
+          include: [
+            {
+              model: UserModel,
+              as: "user",
+              attributes: ["name"],
+            },
+          ],
+        },
+      ],
+    });
 
-    return classroom || null;
+    return classroom;
   }
 
   static async getClassroomStudents(id: number): Promise<any[]> {
-    const students = await db("classroom_students")
-      .join("students", "classroom_students.student_id", "students.id")
-      .join("users", "students.user_id", "users.id")
-      .where("classroom_students.classroom_id", id)
-      .select("students.*", "users.name as student_name");
+    const classroom = await ClassroomModel.findByPk(id, {
+      raw: true,
+      attributes: [],
+      include: [
+        {
+          model: StudentModel,
+          as: "students",
+          include: [
+            {
+              model: UserModel,
+              as: "user",
+              attributes: ["id", "name"],
+            },
+          ],
+        },
+      ],
+    });
 
-    return students;
+    return classroom?.students || [];
   }
 
   static async addStudent(
     classroomId: number,
     studentId: number,
   ): Promise<void> {
-    await db("classroom_students").insert({
+    await ClassroomMemberModel.create({
       classroom_id: classroomId,
       student_id: studentId,
     });
 
-    // TODO: UPDATE CURRENT_CLASSROOM_ID IN STUDENTS TABLE IF NEEDED
+    await ClassroomModel.increment("count_students", {
+      by: 1,
+      where: { id: classroomId },
+    });
+
+    //TODO: UPDATE CURRENT CLASSROOM ID IN STUDENT MODEL
+    // IF CURREENT ACADEMIC YEAR IS ACTIVE
+    //   await StudentModel.update(
+    //     { current_classroom_id: classroomId },
+    //     { where: { id: studentId } },
+    //   );
   }
 }
 

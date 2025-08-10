@@ -1,28 +1,29 @@
-import { AcademicYearAttribute } from "~/models/academic_year";
-import db from "../database/connection";
+import { AcademicYearAttribute, AcademicYearModel } from "~/models";
 import dayjs from "dayjs";
+import { CreationAttributes, Op } from "sequelize";
 
 class AcademicYearService {
   static async getAll(): Promise<AcademicYearAttribute[]> {
-    const academicYears = await db("academic_years").select("*");
+    const academicYears = await AcademicYearModel.findAll({ raw: true });
 
     return academicYears;
   }
 
   static async getActive(): Promise<AcademicYearAttribute | null> {
-    const activeAcademicYear = await db("academic_years")
-      .where({ is_active: true })
-      .first();
+    const activeAcademicYear = await AcademicYearModel.findOne({
+      where: {
+        is_active: true,
+      },
+      raw: true,
+    });
 
     return activeAcademicYear || null;
   }
 
   static async create(
-    data: Partial<AcademicYearAttribute>,
+    data: CreationAttributes<AcademicYearModel>,
   ): Promise<AcademicYearAttribute> {
-    const [newAcademicYear] = await db("academic_years")
-      .insert(data)
-      .returning("*");
+    const newAcademicYear = await AcademicYearModel.create(data);
 
     await this.renewActive();
 
@@ -32,21 +33,36 @@ class AcademicYearService {
   static async renewActive(): Promise<void> {
     const today = dayjs().toISOString();
 
-    const shouldActiveYears = await db("academic_years")
-      .where("start_date", "<=", today)
-      .andWhere("end_date", ">=", today)
-      .orderBy("start_date", "desc");
+    const shouldActiveYears = await AcademicYearModel.findAll({
+      where: {
+        start_date: {
+          [Op.lte]: today,
+        },
+        end_date: {
+          [Op.gte]: today,
+        },
+      },
+      order: [["start_date", "desc"]],
+    });
 
     if (shouldActiveYears.length > 0) {
       const activeYear = shouldActiveYears[0];
 
-      await db("academic_years")
-        .where({ id: activeYear.id })
-        .update({ is_active: true });
+      await AcademicYearModel.update(
+        { is_active: true },
+        {
+          where: { id: activeYear.id },
+        },
+      );
 
-      await db("academic_years")
-        .whereNot({ id: activeYear.id })
-        .update({ is_active: false });
+      await AcademicYearModel.update(
+        {
+          is_active: false,
+        },
+        {
+          where: { id: { [Op.not]: activeYear.id } },
+        },
+      );
     }
   }
 }

@@ -1,10 +1,9 @@
 import { paginate } from "~/utils/pagination";
-import db from "../database/connection";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
 import { HttpError } from "~/types/http-error";
 import TeacherService from "./teacher-service";
 import ClassroomService from "./classroom-service";
-import { SubjectAttribute } from "~/models/subject";
+import { SubjectAttribute } from "~/models";
 
 class SubjectService {
   static async getAll(

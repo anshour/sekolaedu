@@ -1,13 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { UserAttribute } from "../models/user";
 import config from "../config";
 import { HttpError } from "../types/http-error";
 import emailService from "./email-service";
 import { Op } from "sequelize";
-import { PasswordResetModel } from "~/models/password_resets";
-import { TokenBlacklistModel } from "~/models/token_blacklist";
 import UserService from "./user-service";
+import {
+  PasswordResetModel,
+  TokenBlacklistModel,
+  UserAttribute,
+} from "~/models";
 
 class AuthService {
   constructor() {}
@@ -26,7 +28,10 @@ class AuthService {
     }
 
     console.log("User authenticated successfully");
-    const permissions = await UserService.getPermissions(user.role_id, user.id);
+    const permissions = await UserService.getPermissionCodes(
+      user.role_id!,
+      user.id,
+    );
     console.log("Permissions fetched successfully");
 
     delete user.password;

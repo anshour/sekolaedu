@@ -1,66 +1,75 @@
 import { PaginationParams, PaginationResult } from "~/types/pagination";
-import db from "../database/connection";
-import { Permission } from "~/constants/permissions";
-import { paginate } from "~/utils/pagination";
+import { CreationAttributes } from "sequelize";
+import { PermissionableModel, PermissionModel } from "~/models";
 
 class PermissionService {
-  static async create(data: any) {
-    const [res] = await db("permissions").insert(data).returning("id");
-    return { id: res.id, ...data };
+  static async create(data: CreationAttributes<PermissionModel>) {
+    return PermissionModel.create(data, { raw: true });
   }
 
   static async getById(id: number) {
-    return await db("permissions").where({ id }).first();
+    return await PermissionModel.findByPk(id, { raw: true });
   }
 
-  static async update(id: number, data: any) {
-    await db("permissions").where({ id }).update(data);
+  static async update(
+    id: number,
+    data: Partial<CreationAttributes<PermissionModel>>,
+  ) {
+    await PermissionModel.update(data, { where: { id } });
     return { id, ...data };
   }
 
   static async delete(id: number) {
-    await db("permissions").where({ id }).delete();
+    await PermissionModel.destroy({ where: { id } });
   }
 
   static async getAll(
     params: PaginationParams,
-  ): Promise<PaginationResult<Permission>> {
-
-    
-    const query = db("permissions").select("*");
-
-    const data = await paginate<Permission>(query, params);
-
-    return data;
+  ): Promise<PaginationResult<PermissionModel>> {
+    return PermissionModel.paginate({
+      page: params.page,
+      limit: params.limit,
+      order: [["created_at", "DESC"]],
+    });
   }
 
-  static async isNameTaken(name: string): Promise<boolean> {
-    const permission = await db("permissions").where({ name }).first();
-    return permission !== undefined;
+  static async isCodeTaken(code: string): Promise<boolean> {
+    const permission = await PermissionModel.findOne({ where: { code } });
+    return permission !== null;
   }
 
   static async attachPermissionToUser(userId: number, permissionId: number) {
-    await db("user_permissions").insert({
-      user_id: userId,
+    await PermissionableModel.create({
       permission_id: permissionId,
+      permissionable_id: userId,
+      permissionable_type: "user",
     });
   }
 
   static async detachPermissionFromUser(userId: number, permissionId: number) {
-    await db("user_permissions")
-      .where({ user_id: userId, permission_id: permissionId })
-      .delete();
+    await PermissionableModel.destroy({
+      where: {
+        permissionable_id: userId,
+        permissionable_type: "user",
+        permission_id: permissionId,
+      },
+    });
   }
 
   static async detachPermissionFromRole(roleId: number, permissionId: number) {
-    await db("role_permissions")
-      .where({ role_id: roleId, permission_id: permissionId })
-      .delete();
+    await PermissionableModel.destroy({
+      where: {
+        permissionable_id: roleId,
+        permissionable_type: "role",
+        permission_id: permissionId,
+      },
+    });
   }
 
   static async attachPermissionToRole(roleId: number, permissionId: number) {
-    await db("role_permissions").insert({
-      role_id: roleId,
+    await PermissionableModel.create({
+      permissionable_id: roleId,
+      permissionable_type: "role",
       permission_id: permissionId,
     });
   }

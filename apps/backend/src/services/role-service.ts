@@ -1,34 +1,22 @@
-import { paginate } from "~/utils/pagination";
-import db from "../database/connection";
-import { RoleAttribute, RoleModel } from "~/models/role";
-import { attachManyToMany } from "~/utils/attach-relation";
+import { RoleModel } from "~/models";
 import { PaginationParams, PaginationResult } from "~/types/pagination";
+import { CreationAttributes } from "sequelize";
 
 class RoleService {
-  static async create(data: any) {
-    const [res] = await db("roles").insert(data).returning("id");
-
-    console.log("Role created with ID:", res);
-    return { id: res.id, ...data };
+  static async create(data: CreationAttributes<RoleModel>) {
+    return RoleModel.create(data, { raw: true });
   }
 
   static async getById(id: number) {
-    const role = await db("roles").where({ id }).first();
-
-    const [roleWithPermissions] = await attachManyToMany([role], {
-      parentIdKey: "id",
-      relationTable: "role_permissions",
-      parentForeignKey: "role_id",
-      relatedForeignKey: "permission_id",
-      relatedTable: "permissions",
-      relatedFields: ["id", "name", "description"],
-      outputKey: "permissions",
+    const role = await RoleModel.findByPk(id, {
+      raw: true,
+      include: ["permissions"],
     });
 
-    return roleWithPermissions;
+    return role;
   }
 
-  static async getRoleNameById(id: number): Promise<string | null> {
+  static async getRoleCodeById(id: number): Promise<string | null> {
     const role = await RoleModel.findOne({
       where: {
         id,
@@ -36,29 +24,47 @@ class RoleService {
       raw: true,
     });
 
-    return role?.name || "";
+    return role?.code || "";
   }
 
-  static async isNameTaken(name: string): Promise<boolean> {
-    const role = await db("roles").where({ name }).first();
-    return role !== undefined;
+  static async isCodeTaken(code: string): Promise<boolean> {
+    const role = await RoleModel.findOne({
+      where: {
+        code,
+      },
+      raw: true,
+    });
+    return role !== null;
   }
 
-  static async update(id: number, data: any) {
-    await db("roles").where({ id }).update(data);
+  static async update(
+    id: number,
+    data: Partial<CreationAttributes<RoleModel>>,
+  ) {
+    await RoleModel.update(data, {
+      where: {
+        id,
+      },
+    });
     return { id, ...data };
   }
 
   static async delete(id: number) {
-    await db("roles").where({ id }).delete();
+    await RoleModel.destroy({
+      where: {
+        id,
+      },
+    });
   }
 
   static async getAll(
     params: PaginationParams,
-  ): Promise<PaginationResult<RoleAttribute>> {
-    const query = db("roles").select("*");
-
-    const data = await paginate<RoleAttribute>(query, params);
+  ): Promise<PaginationResult<RoleModel>> {
+    const data = await RoleModel.paginate({
+      page: params.page,
+      limit: params.limit,
+      order: [["created_at", "DESC"]],
+    });
 
     return data;
   }
