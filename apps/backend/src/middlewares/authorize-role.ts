@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { UserAttribute } from "~/models/user";
+import { UserAttribute } from "~/models";
 import { HttpError } from "~/types/http-error";
 
 function authorizeRole(roles: string | string[]) {
