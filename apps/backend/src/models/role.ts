@@ -24,7 +24,7 @@ export class RoleModel extends BaseModel<
       through: {
         model: PermissionableModel,
         unique: false,
-        scope: { where: { type: "role" } },
+        scope: { permissionable_type: "role" },
       },
       foreignKey: "permissionable_id",
       otherKey: "permission_id",
