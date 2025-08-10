@@ -8,14 +8,15 @@ import validate from "~/utils/validate";
 const permissionController = {
   async createPermission(req: Request, res: Response) {
     const schema = z.object({
-      name: z.string(),
+      label: z.string(),
+      code: z.string(),
       description: z.string(),
     });
     const data = validate(schema, req.body);
 
-    const isNameTaken = await PermissionService.isNameTaken(data.name);
-    if (isNameTaken) {
-      throw new HttpError("Permission name already taken", 400);
+    const isCodeTaken = await PermissionService.isCodeTaken(data.code);
+    if (isCodeTaken) {
+      throw new HttpError("Permission code already taken", 400);
     }
     const permission = await PermissionService.create(data);
     res.status(201).json(permission);

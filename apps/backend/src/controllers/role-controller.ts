@@ -8,14 +8,16 @@ import { HttpError } from "~/types/http-error";
 const roleController = {
   async createRole(req: Request, res: Response) {
     const schema = z.object({
-      name: z.string(),
+      code: z.string(),
+      label: z.string(),
+      description: z.string(),
     });
     const data = validate(schema, req.body);
 
-    const isNameTaken = await RoleService.isNameTaken(data.name);
+    const isCodeTaken = await RoleService.isCodeTaken(data.code);
 
-    if (isNameTaken) {
-      throw new HttpError("Role name already taken", 400);
+    if (isCodeTaken) {
+      throw new HttpError("Role code already taken", 400);
     }
     const role = await RoleService.create(data);
     res.status(201).json(role);
@@ -32,7 +34,9 @@ const roleController = {
 
   async updateRole(req: Request, res: Response) {
     const schema = z.object({
-      name: z.string(),
+      code: z.string(),
+      label: z.string(),
+      description: z.string(),
     });
     const data = validate(schema, req.body);
     const role = await RoleService.update(Number(req.params.id), data);
