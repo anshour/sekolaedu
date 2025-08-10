@@ -3,9 +3,12 @@ import {
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
+  NonAttribute,
 } from "sequelize";
 import { baseInit, BaseModel } from "./base";
-import { TeacherModel } from "./teacher";
+import { TeacherAttribute, TeacherModel } from "./teacher";
+import { StudentModel } from "./student";
+import { ClassroomMemberModel } from "./classroom_member";
 
 export class ClassroomModel extends BaseModel<
   InferAttributes<ClassroomModel>,
@@ -13,9 +16,12 @@ export class ClassroomModel extends BaseModel<
 > {
   declare id: CreationOptional<number>;
   declare name: string;
+  declare count_students: CreationOptional<number>;
   declare academic_year_id: number;
-  declare count_students: number;
+  declare level: number;
+  declare students: NonAttribute<StudentModel[]> | null;
   declare guardian_teacher_id: number | null;
+  declare guardian_teacher: NonAttribute<TeacherAttribute> | null;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
 
@@ -23,6 +29,14 @@ export class ClassroomModel extends BaseModel<
     this.belongsTo(TeacherModel, {
       foreignKey: "guardian_teacher_id",
       as: "guardian_teacher",
+    });
+
+    this.belongsToMany(StudentModel, {
+      through: {
+        model: ClassroomMemberModel,
+      },
+      foreignKey: "classroom_id",
+      as: "students",
     });
   }
 
@@ -42,9 +56,14 @@ export class ClassroomModel extends BaseModel<
           type: DataTypes.STRING,
           allowNull: false,
         },
+        level: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
         count_students: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          defaultValue: 0,
         },
         guardian_teacher_id: {
           type: DataTypes.BIGINT,
