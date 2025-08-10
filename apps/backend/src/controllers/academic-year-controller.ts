@@ -25,6 +25,7 @@ const academicYearController = {
       name: z.string(),
       start_date: z.iso.date(),
       end_date: z.iso.date(),
+      is_active: z.boolean().optional().default(false),
     });
     const data = validate(schema, req.body);
 
