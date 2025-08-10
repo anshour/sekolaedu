@@ -11,11 +11,15 @@ export = {
         autoIncrement: true,
         primaryKey: true,
       },
-      name: { type: DataTypes.STRING(50), allowNull: false },
-      count_students: {
-        type: DataTypes.INTEGER,
+      academic_year_id: {
+        type: DataTypes.BIGINT,
         allowNull: false,
-        defaultValue: 0,
+        references: {
+          model: {
+            tableName: "academic_years",
+          },
+          key: "id",
+        },
       },
       guardian_teacher_id: {
         type: DataTypes.BIGINT,
@@ -27,6 +31,17 @@ export = {
           key: "id",
         },
       },
+      name: { type: DataTypes.STRING(50), allowNull: false },
+      level: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      count_students: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+
       created_at: {
         type: DataTypes.DATE,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
