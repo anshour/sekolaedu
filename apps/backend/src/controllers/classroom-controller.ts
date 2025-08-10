@@ -14,7 +14,7 @@ const classroomController = {
     const schema = z.object({
       name: z.string(),
       level: z.int(),
-      guardian_teacher_id: z.int().optional(),
+      guardian_teacher_id: z.int().nullable(),
       academic_year_id: z.int(),
     });
 
