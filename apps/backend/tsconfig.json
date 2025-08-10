@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
 
     "module": "NodeNext",
     "moduleResolution": "nodenext",
@@ -18,6 +17,6 @@
       "~/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.jsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.jsx", "src/**/*.js"],
   "exclude": ["node_modules", "dist"]
 }
