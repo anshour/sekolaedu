@@ -6,6 +6,8 @@ import {
 } from "sequelize";
 import { baseInit, BaseModel } from "./base";
 import { UserModel } from "./user";
+import { ClassroomModel } from "./classroom";
+import { ClassroomMemberModel } from "./classroom_member";
 
 export class StudentModel extends BaseModel<
   InferAttributes<StudentModel>,
@@ -27,6 +29,19 @@ export class StudentModel extends BaseModel<
     this.belongsTo(UserModel, {
       foreignKey: "user_id",
       as: "user",
+    });
+
+    this.belongsTo(ClassroomModel, {
+      foreignKey: "current_classroom_id",
+      as: "current_classroom",
+    });
+
+    this.belongsToMany(ClassroomModel, {
+      through: {
+        model: ClassroomMemberModel,
+      },
+      foreignKey: "student_id",
+      as: "classrooms",
     });
   }
 
