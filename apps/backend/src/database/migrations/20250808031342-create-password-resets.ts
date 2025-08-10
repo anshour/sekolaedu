@@ -24,6 +24,7 @@ export = {
         onDelete: "CASCADE",
       },
       email: { type: DataTypes.STRING(100), allowNull: false },
+      token: { type: DataTypes.STRING, allowNull: false },
       expires_at: { type: DataTypes.DATE, allowNull: false },
       created_at: {
         type: DataTypes.DATE,
