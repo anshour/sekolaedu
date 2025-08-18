@@ -53,6 +53,24 @@ export class TeacherModel extends BaseModel<
         ...baseInit,
         modelName: "Teacher",
         tableName: "teachers",
+        scopes: {
+          withUser: {
+            include: [
+              {
+                association: "user",
+                attributes: ["id", "name"],
+              },
+            ],
+          },
+          withSubjects: {
+            include: [
+              {
+                association: "subjects",
+                attributes: ["id", "name"],
+              },
+            ],
+          },
+        },
       },
     );
   }
