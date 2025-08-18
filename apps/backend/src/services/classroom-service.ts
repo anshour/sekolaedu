@@ -7,6 +7,8 @@ import {
   TeacherModel,
   UserModel,
 } from "~/models";
+import AcademicYearService from "./academic-year-service";
+import { HttpError } from "~/types/http-error";
 
 class ClassroomService {
   static async getAll(): Promise<ClassroomAttribute[]> {
@@ -33,7 +35,14 @@ class ClassroomService {
   static async create(
     data: CreationAttributes<ClassroomModel>,
   ): Promise<ClassroomAttribute> {
-    console.log("Creating classroom with data:", data);
+    const academicYear = await AcademicYearService.getById(
+      data.academic_year_id,
+    );
+
+    if (!academicYear) {
+      throw new HttpError("Academic year not found", 400);
+    }
+
     return ClassroomModel.create(data, { raw: true });
   }
 
