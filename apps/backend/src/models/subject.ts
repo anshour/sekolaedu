@@ -6,6 +6,7 @@ import {
 } from "sequelize";
 import { baseInit, BaseModel } from "./base";
 import { TeacherModel } from "./teacher";
+import { ClassroomModel } from "./classroom";
 
 export class SubjectModel extends BaseModel<
   InferAttributes<SubjectModel>,
@@ -13,6 +14,7 @@ export class SubjectModel extends BaseModel<
 > {
   declare id: CreationOptional<number>;
   declare classroom_id: number;
+  declare academic_year_id: number;
   declare teacher_id: number | null;
   declare name: string;
   declare created_at: CreationOptional<Date>;
@@ -22,6 +24,11 @@ export class SubjectModel extends BaseModel<
     this.belongsTo(TeacherModel, {
       foreignKey: "teacher_id",
       as: "teacher",
+    });
+
+    this.belongsTo(ClassroomModel, {
+      foreignKey: "classroom_id",
+      as: "classroom",
     });
   }
 
@@ -34,6 +41,10 @@ export class SubjectModel extends BaseModel<
           primaryKey: true,
         },
         classroom_id: {
+          type: DataTypes.BIGINT,
+          allowNull: false,
+        },
+        academic_year_id: {
           type: DataTypes.BIGINT,
           allowNull: false,
         },
@@ -52,6 +63,24 @@ export class SubjectModel extends BaseModel<
         ...baseInit,
         modelName: "Subject",
         tableName: "subjects",
+        scopes: {
+          withRelations: {
+            include: [
+              {
+                association: "teacher",
+                include: [
+                  {
+                    association: "user",
+                    attributes: ["id", "name"],
+                  },
+                ],
+              },
+              {
+                association: "classroom",
+              },
+            ],
+          },
+        },
       },
     );
   }

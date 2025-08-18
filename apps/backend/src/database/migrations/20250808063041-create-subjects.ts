@@ -11,6 +11,16 @@ export = {
         autoIncrement: true,
         primaryKey: true,
       },
+      academic_year_id: {
+        type: DataTypes.BIGINT,
+        references: {
+          model: {
+            tableName: "academic_years",
+          },
+        },
+        key: "id",
+        onDelete: "SET NULL",
+      },
       classroom_id: {
         type: DataTypes.BIGINT,
         allowNull: false,
