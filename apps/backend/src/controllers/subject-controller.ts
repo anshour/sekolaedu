@@ -7,7 +7,7 @@ import { z } from "zod/v4";
 const subjectController = {
   async getAllSubjects(req: Request, res: Response) {
     const schema = createPaginationSchema({
-      allowedFilters: ["classroom_id", "name", "search"],
+      allowedFilters: ["classroom_id", "name", "academic_year_id"],
       allowedSorts: ["name", "classroom_name", "teacher_name"],
     });
 
