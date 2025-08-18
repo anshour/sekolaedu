@@ -19,9 +19,28 @@ class TeacherService {
       limit: params.limit,
       order: orderQuery,
       where: whereQuery,
+      include: [
+        {
+          association: "user",
+          attributes: ["id", "name"],
+        },
+      ],
     });
 
     return data;
+  }
+
+  static async getById(id: number): Promise<TeacherAttribute | null> {
+    const teacher = await TeacherModel.scope([
+      "withUser",
+      "withSubjects",
+    ]).findOne({
+      where: { id },
+      raw: true,
+      nest: true,
+    });
+
+    return teacher;
   }
 
   static async createFromUser(userId: number): Promise<TeacherAttribute> {
@@ -37,7 +56,7 @@ class TeacherService {
   }
 
   static async getByUserId(userId: number): Promise<TeacherAttribute | null> {
-    const teacher = await TeacherModel.findOne({
+    const teacher = await TeacherModel.scope("withUser").findOne({
       where: { user_id: userId },
       raw: true,
     });
