@@ -9,6 +9,12 @@ class AcademicYearService {
     return academicYears;
   }
 
+  static async getById(id: number): Promise<AcademicYearAttribute | null> {
+    const academicYear = await AcademicYearModel.findByPk(id, { raw: true });
+
+    return academicYear;
+  }
+
   static async getActive(): Promise<AcademicYearAttribute | null> {
     const activeAcademicYear = await AcademicYearModel.findOne({
       where: {
